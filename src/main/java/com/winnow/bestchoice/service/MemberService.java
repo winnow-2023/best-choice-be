@@ -13,8 +13,14 @@ import org.springframework.stereotype.Service;
 public class MemberService {
     private final MemberRepository memberRepository;
 
+
     public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    public Member findByEmail(String email) {
+        return memberRepository.findByEmail(email)
                 .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

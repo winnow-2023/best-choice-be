@@ -22,7 +22,7 @@ public class TokenService {
             throw new CustomException(REFRESHTOKEN_INVALID);
         }
 
-        Long memberId = refreshTokenService.findByRefreshToken(refreshToken).getUserId();
+        Long memberId = refreshTokenService.findByRefreshToken(refreshToken).getMemberId();
         Member member = memberService.findById(memberId);
 
         return tokenProvider.generateToken(member, Duration.ofHours(1));

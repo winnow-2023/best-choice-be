@@ -1,4 +1,4 @@
-package com.winnow.bestchoice.config.filter;
+package com.winnow.bestchoice.config;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import lombok.RequiredArgsConstructor;
