@@ -20,7 +20,7 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
 
     private final MemberRepository memberRepository;
 
-    // 요청을 바탕으로 회원 정보를 담은 객체 반환
+    // 요청을 바탕으로 회원 정보를 담은 객체(OAuth2User) 반환
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
         OAuth2User user = super.loadUser(userRequest);

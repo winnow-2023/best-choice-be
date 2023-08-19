@@ -53,7 +53,7 @@ public class WebOAuthSecurityConfig {
         // 토큰 재발급 URL은 인증 없이 접근 가능하도록 설정, 나머지 API URL은 인증 필요
         http.authorizeRequests()
                 .antMatchers("/api/token", "/h2-console/**").permitAll()
-                .antMatchers("/api/**").authenticated()
+                .antMatchers("/api/**", "/oauth/**").authenticated()
                 .anyRequest().permitAll();
         http.oauth2Login()
                 .loginPage("/login")
@@ -78,9 +78,8 @@ public class WebOAuthSecurityConfig {
 
     @Bean
     public OAuth2SuccessHandler oAuth2SuccessHandler() {
-        return new OAuth2SuccessHandler(tokenProvider,
-                refreshTokenRepository,
-                oAuth2AuthorizationRequestBasedOnCookieRepository(),
+        return new OAuth2SuccessHandler(tokenProvider, refreshTokenRepository
+                , oAuth2AuthorizationRequestBasedOnCookieRepository(),
                 memberService
         );
     }

@@ -25,7 +25,7 @@ spring:
           google:
             client-id: 799378242531-6sdsso0a2asq5ui7h3it5gruhfekpr2o.apps.googleusercontent.com
             client-secret: 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
-            redirect-uri:  http://localhost:8080/login/oauth2/code/google
+            redirect-uri:  http://localhost:8080/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
               - profile
@@ -48,7 +48,7 @@ spring:
 #            client-authentication-method: POST
         provider:
           google:
-            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?access_type=offline&prompt=consent
+            authorization-uri: https://accounts.google.com/o/oauth2/v2/auth?client-id=799378242531-6sdsso0a2asq5ui7h3it5gruhfekpr2o.apps.googleusercontent.com&client-secret=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
 #          naver:
 #            authorization-uri: https://nid.naver.com/auth2.0/authorize
 #            jwk-set-uri: https://openapi.naver.com/v1/nid/verify
