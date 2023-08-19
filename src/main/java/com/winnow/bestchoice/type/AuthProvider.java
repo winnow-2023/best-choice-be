@@ -1,6 +1,9 @@
 package com.winnow.bestchoice.type;
 
-public enum Provider {
+import lombok.Getter;
+
+@Getter
+public enum AuthProvider {
 
   NAVER, KAKAO, GOOGLE
 
