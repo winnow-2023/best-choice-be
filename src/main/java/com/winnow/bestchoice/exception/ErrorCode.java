@@ -1,19 +1,21 @@
 package com.winnow.bestchoice.exception;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+
+import static org.springframework.http.HttpStatus.*;
 
 @Getter
 @RequiredArgsConstructor
 public enum ErrorCode {
 
   SERVER_ERROR("내부 서버 오류가 발생했습니다.", INTERNAL_SERVER_ERROR),
-  INVALID_REQUEST("잘못된 요청입니다.", BAD_REQUEST)
-  ;
+  INVALID_REQUEST("잘못된 요청입니다.", BAD_REQUEST),
+  REFRESHTOKEN_NOT_FOUND("해당 리프레시 토큰을 찾을 수 없습니다.", NOT_FOUND),
+  MEMBER_NOT_FOUND("해당 회원을 찾을 수 없습니다.", NOT_FOUND),
+  INVALID_PROVIDER("유효 하지 않는 Provider 타입입니다.", CONFLICT),
+  OAUTH_PROVIDER_MISS_MATCH("Provider Type이 일치하지 않습니다.", BAD_REQUEST);
 
   private final String description;
   private final HttpStatus httpStatus;
