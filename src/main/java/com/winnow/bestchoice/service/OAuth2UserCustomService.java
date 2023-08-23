@@ -1,0 +1,89 @@
+package com.winnow.bestchoice.service;
+
+
+import com.winnow.bestchoice.config.ouath.entity.UserPrincipal;
+import com.winnow.bestchoice.config.ouath.info.OAuth2UserInfo;
+import com.winnow.bestchoice.config.ouath.info.OAuth2UserInfoFactory;
+import com.winnow.bestchoice.entity.Member;
+import com.winnow.bestchoice.exception.CustomException;
+import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.repository.MemberRepository;
+import com.winnow.bestchoice.type.MemberStatus;
+import com.winnow.bestchoice.type.Provider;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
+import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+
+
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class OAuth2UserCustomService extends DefaultOAuth2UserService {
+
+    private final MemberRepository memberRepository;
+
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        OAuth2User user = super.loadUser(userRequest);
+        try {
+            return saveOrUpdate(userRequest, user);
+        } catch (Exception e) {
+            throw new CustomException(ErrorCode.SERVER_ERROR);
+        }
+    }
+
+    // 유저가 있으면 업데이트 없으면 유저 생성
+    private OAuth2User saveOrUpdate(OAuth2UserRequest userRequest, OAuth2User user) {
+        // Provider : 연동사이트(GOOGLE, NAVER, KAKAO)
+        Provider provider = Provider.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
+        OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, user.getAttributes());
+
+        Member savedMember = memberRepository.findByEmail(userInfo.getEmail()).orElse(null);
+
+        // 해당 이메일로 가입한 회원이 있는 경우
+        if (savedMember != null) {
+            if (provider != savedMember.getProvider()) {
+                throw new CustomException(ErrorCode.OAUTH_PROVIDER_MISS_MATCH);
+            }
+            updateUser(savedMember, userInfo);
+        } else { // 해당 이메일로 가입한 적이 없는 경우
+            savedMember = createUser(userInfo, provider);
+        }
+
+        return UserPrincipal.create(savedMember, user.getAttributes());
+    }
+
+    private Member createUser(OAuth2UserInfo userInfo, Provider provider) {
+        LocalDateTime now = LocalDateTime.now();
+        log.info("email : {}", userInfo.getEmail());
+
+        Member member = new Member(
+                null,
+                userInfo.getName(),
+                userInfo.getEmail(),
+                userInfo.getId(),
+                MemberStatus.ACTIVE,
+                provider,
+                now,
+                now);
+        memberRepository.saveAndFlush(member);
+
+        return member;
+    }
+
+    private Member updateUser(Member member, OAuth2UserInfo userInfo) {
+        if (userInfo.getName() != null || member.getEmail().equals(userInfo.getEmail())) {
+            member.setNickname(userInfo.getName());
+            memberRepository.saveAndFlush(member);
+        }
+        return member;
+    }
+
+}
+
