@@ -1,8 +1,5 @@
 package com.winnow.bestchoice.exception;
 
-import static com.winnow.bestchoice.exception.ErrorCode.INVALID_REQUEST;
-import static com.winnow.bestchoice.exception.ErrorCode.SERVER_ERROR;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +8,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import static com.winnow.bestchoice.exception.ErrorCode.INVALID_REQUEST;
+import static com.winnow.bestchoice.exception.ErrorCode.SERVER_ERROR;
+
 
 @Slf4j
 @RestControllerAdvice

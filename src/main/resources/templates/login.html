@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <title>로그인</title>
 </head>
 <body>
-<a href="https://accounts.google.com/o/oauth2/auth?client_id=799378242531-6sdsso0a2asq5ui7h3it5gruhfekpr2o.apps.googleusercontent.com&redirect_uri=http://localhost:8080/oauth2/code/google&response_type=code&scope=https://www.googleapis.com/auth/userinfo.email">구글 로그인</a>
+<a href="http://localhost:8080/oauth2/authorization/google?redirect_uri=http://localhost:8080/oauth2/code/google">구글 로그인</a>
+<a href="http://localhost:8080/oauth2/authorization/naver?redirect_uri=http://localhost:8080/oauth2/code/naver">네이버 로그인</a>
+<a href="http://localhost:8080/oauth2/authorization/kakao?redirect_uri=http://localhost:8080/oauth2/code/kakao">카카오 로그인</a>
 </body>
 </html>
