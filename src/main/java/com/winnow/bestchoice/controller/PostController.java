@@ -1,7 +1,9 @@
 package com.winnow.bestchoice.controller;
 
+import com.winnow.bestchoice.model.request.CreateCommentForm;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
+import com.winnow.bestchoice.service.CommentService;
 import com.winnow.bestchoice.service.PostService;
 import com.winnow.bestchoice.type.Option;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final CommentService commentService;
 
     @PostMapping
     public ResponseEntity<?> createPost(Authentication authentication,
@@ -54,6 +57,15 @@ public class PostController {
                                           @RequestParam Option option) {
 
         postService.choiceOption(authentication, postId, option);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{postId}/comments")
+    public ResponseEntity<?> createComment(Authentication authentication, @PathVariable long postId,
+                                           @RequestBody @Valid CreateCommentForm commentForm) {
+
+        commentService.createComment(authentication, postId, commentForm);
 
         return ResponseEntity.ok().build();
     }
