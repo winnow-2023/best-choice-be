@@ -42,4 +42,12 @@ public class PostController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{postId}/unlike")
+    public ResponseEntity<?> unlikePost(Authentication authentication, @PathVariable long postId) {
+
+        postService.unlikePost(authentication, postId);
+
+        return ResponseEntity.ok().build();
+    }
 }

@@ -31,7 +31,7 @@ public class PostService {
     private final TokenProvider tokenProvider;
 
 
-    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) {
+    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) { // 최적화 - tag 한 번에?
         if (files.size() > 5) { //첨부파일 5개 초과하는 경우
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
@@ -42,7 +42,7 @@ public class PostService {
                 orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
 
         Post post = createPostForm.toEntity(member);
-        postRepository.save(post); //post 저장
+        postRepository.save(post);
 
         List<String> tags = createPostForm.getTags();
         List<PostTag> postTags = new ArrayList<>();
@@ -68,7 +68,7 @@ public class PostService {
         return postDetail;
     }
 
-    public void likePost(Authentication authentication, long postId) { // 최적화
+    public void likePost(Authentication authentication, long postId) { //최적화 @DynamicUpdate?
         Long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId)
@@ -83,5 +83,21 @@ public class PostService {
 
         post.setLikeCount(post.getLikeCount() + 1);
         postLikeRepository.save(new PostLike(member, post));
+    }
+
+    public void unlikePost(Authentication authentication, long postId) { //최적화
+        Long memberId = tokenProvider.getMemberId(authentication);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        PostLike postLike = postLikeRepository.findByPostAndMember(post, member)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
+
+        post.setLikeCount(post.getLikeCount() - 1);
+        postLikeRepository.delete(postLike);
     }
 }
