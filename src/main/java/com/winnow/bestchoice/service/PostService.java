@@ -1,18 +1,12 @@
 package com.winnow.bestchoice.service;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
-import com.winnow.bestchoice.entity.Member;
-import com.winnow.bestchoice.entity.Post;
-import com.winnow.bestchoice.entity.PostTag;
-import com.winnow.bestchoice.entity.Tag;
+import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
-import com.winnow.bestchoice.repository.MemberRepository;
-import com.winnow.bestchoice.repository.PostRepository;
-import com.winnow.bestchoice.repository.PostTagRepository;
-import com.winnow.bestchoice.repository.TagRepository;
+import com.winnow.bestchoice.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -33,6 +27,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
+    private final PostLikeRepository postLikeRepository;
     private final TokenProvider tokenProvider;
 
 
@@ -71,5 +66,22 @@ public class PostService {
         postDetail.setResources(resources);
 
         return postDetail;
+    }
+
+    public void likePost(Authentication authentication, long postId) { // 최적화
+        Long memberId = tokenProvider.getMemberId(authentication);
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        if (postLikeRepository.existsByPostAndMember(post, member)) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        post.setLikeCount(post.getLikeCount() + 1);
+        postLikeRepository.save(new PostLike(member, post));
     }
 }
