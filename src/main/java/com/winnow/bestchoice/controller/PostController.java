@@ -3,15 +3,13 @@ package com.winnow.bestchoice.controller;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.service.PostService;
+import com.winnow.bestchoice.type.Option;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
@@ -47,6 +45,15 @@ public class PostController {
     public ResponseEntity<?> unlikePost(Authentication authentication, @PathVariable long postId) {
 
         postService.unlikePost(authentication, postId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/{postId}/choice")
+    public ResponseEntity<?> choiceOption(Authentication authentication, @PathVariable long postId,
+                                          @RequestParam Option option) {
+
+        postService.choiceOption(authentication, postId, option);
 
         return ResponseEntity.ok().build();
     }
