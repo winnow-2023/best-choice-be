@@ -50,7 +50,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
         OAuth2UserInfo userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, oAuth2User.getAttributes());
 
         Member member = memberRepository.findByEmail(userInfo.getEmail())
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         // 액세스 토큰 생성, 리프레시 토큰 생성
         String accessToken = tokenProvider.generateToken(member, ACCESS_TOKEN_DURATION);

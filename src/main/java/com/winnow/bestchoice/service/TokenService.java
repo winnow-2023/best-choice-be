@@ -16,7 +16,7 @@ public class TokenService {
 
     private final TokenProvider tokenProvider;
     private final RefreshTokenService refreshTokenService;
-    private final UserService userService;
+    private final MemberService userService;
 
     public String createNewAccessToken(String refreshToken) {
         // 토큰 유효성 검사 실패하면 예외 발생

@@ -27,7 +27,7 @@ public class CommentService {
         long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
         if (!postRepository.existsById(postId)) {
