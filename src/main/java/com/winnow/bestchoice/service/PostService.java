@@ -1,5 +1,6 @@
 package com.winnow.bestchoice.service;
 
+import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.entity.PostTag;
@@ -32,6 +33,7 @@ public class PostService {
     private final MemberRepository memberRepository;
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
+    private final TokenProvider tokenProvider;
 
 
     public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) {
@@ -39,8 +41,7 @@ public class PostService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        Principal principal = (Principal) authentication.getPrincipal(); //authentication null 처리 필요(NPE 발생)
-        long memberId = Long.parseLong(principal.getName()); //member pk 뽑아오기 -> OAuth 쪽에 구현?
+        long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId).
                 orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));

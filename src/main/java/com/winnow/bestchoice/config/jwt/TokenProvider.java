@@ -13,6 +13,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +28,17 @@ public class TokenProvider {
     public String generateToken(Member member, Duration expiredAt) {
         Date now = new Date();
         return makeToken(new Date(now.getTime() + expiredAt.toMillis()), member);
+    }
+
+    @PostConstruct //for test
+    public void createTestJwt() {
+        Member member = Member.builder().id(1L).email("test@email.com").build();
+        Date now = new Date();
+        Duration expiredAt = Duration.ofDays(1);
+        String token = makeToken(new Date(now.getTime() + expiredAt.toMillis()), member);
+        System.out.println("-------------------------");
+        System.out.println("test jwt token = " + token);
+        System.out.println("-------------------------");
     }
 
     // JWT 토큰 생성 메서드
@@ -64,8 +76,14 @@ public class TokenProvider {
                 (claims.getSubject(), "", authorities), token, authorities);
     }
 
+    //authentication에서 member pk 한 번에 뽑기
+    public Long getMemberId(Authentication authentication) {
+        String token = (String) authentication.getCredentials();
+        return getUserId(token);
+    }
+
     // 토큰 기반으로 유저ID를 가져오는 메서드
-    public Long getUserId(String token) {
+    private Long getUserId(String token) {
         Claims claims = getClaims(token);
         return claims.get("id", Long.class);
     }
