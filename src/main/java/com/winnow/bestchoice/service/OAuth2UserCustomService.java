@@ -10,6 +10,7 @@ import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.type.MemberStatus;
 import com.winnow.bestchoice.type.Provider;
+import com.winnow.bestchoice.util.NicknameUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -65,7 +66,7 @@ public class OAuth2UserCustomService extends DefaultOAuth2UserService {
 
         Member member = new Member(
                 null,
-                userInfo.getName(),
+                NicknameUtil.generateNickname(), // 랜덤으로 생성한 닉네임이 들어감
                 userInfo.getEmail(),
                 userInfo.getId(),
                 MemberStatus.ACTIVE,

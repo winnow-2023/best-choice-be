@@ -32,12 +32,12 @@ public class GlobalExceptionHandler {
     StringBuilder errorMessage = new StringBuilder();
 
     for (FieldError fieldError : bindingResult.getFieldErrors()) {
-      errorMessage.append(fieldError.getDefaultMessage()).append("; ");
+      errorMessage.append(fieldError.getDefaultMessage());
     }
 
     log.info("MethodArgumentNotValidException is occurred.", e);
     return ResponseEntity.badRequest().body(
-        new ErrorResponse(INVALID_REQUEST, INVALID_REQUEST.getDescription()));
+        new ErrorResponse(INVALID_REQUEST, errorMessage.toString()));
   }
 
   @ExceptionHandler(MethodArgumentTypeMismatchException.class)

@@ -79,11 +79,11 @@ public class TokenProvider {
     //authentication에서 member pk 한 번에 뽑기
     public Long getMemberId(Authentication authentication) {
         String token = (String) authentication.getCredentials();
-        return getUserId(token);
+        return getMemberId(token);
     }
 
     // 토큰 기반으로 유저ID를 가져오는 메서드
-    private Long getUserId(String token) {
+    private Long getMemberId(String token) {
         Claims claims = getClaims(token);
         return claims.get("id", Long.class);
     }

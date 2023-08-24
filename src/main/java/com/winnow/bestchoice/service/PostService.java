@@ -14,8 +14,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -41,7 +39,7 @@ public class PostService {
         long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId).
-                orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         Post post = createPostForm.toEntity(member);
         postRepository.save(post);
@@ -74,7 +72,7 @@ public class PostService {
         Long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -91,7 +89,7 @@ public class PostService {
         Long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -107,7 +105,7 @@ public class PostService {
         Long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
-            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
         if (!postRepository.existsById(postId)) {

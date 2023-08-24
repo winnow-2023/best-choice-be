@@ -12,7 +12,4 @@ public class MemberViewController {
     public String login() {
         return "login";
     }
-
-
-
 }
