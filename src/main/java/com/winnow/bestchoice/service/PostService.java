@@ -7,6 +7,7 @@ import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.repository.*;
+import com.winnow.bestchoice.type.Option;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class PostService {
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
     private final PostLikeRepository postLikeRepository;
+    private final ChoiceRepository choiceRepository;
     private final TokenProvider tokenProvider;
 
 
@@ -99,5 +101,29 @@ public class PostService {
 
         post.setLikeCount(post.getLikeCount() - 1);
         postLikeRepository.delete(postLike);
+    }
+
+    public void choiceOption(Authentication authentication, long postId, Option choice) {
+        Long memberId = tokenProvider.getMemberId(authentication);
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        if (!postRepository.existsById(postId)) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+
+        Member member = memberRepository.getReferenceById(memberId);
+        Post post = postRepository.getReferenceById(postId);
+
+        if (choiceRepository.existsByPostAndMember(post, member)) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        choiceRepository.save(Choice.builder()
+                .member(member)
+                .post(post)
+                .option(choice).build());
     }
 }
