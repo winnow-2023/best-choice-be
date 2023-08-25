@@ -8,11 +8,17 @@ import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.request.CreateCommentForm;
+import com.winnow.bestchoice.model.response.CommentRes;
 import com.winnow.bestchoice.repository.CommentLikeRepository;
 import com.winnow.bestchoice.repository.CommentRepository;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.repository.PostRepository;
+import com.winnow.bestchoice.type.CommentSort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -102,5 +108,16 @@ public class CommentService {
         }
 
         comment.setDeletedDate(LocalDateTime.now());
+    }
+
+    public Page<CommentRes> getComments(long postId, int page, int size, CommentSort sort) {
+        if (!postRepository.existsById(postId)) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+
+        Post post = postRepository.getReferenceById(postId);
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort.getValue()));
+        return commentRepository.findByPost(post, pageRequest).map(CommentRes::of);
     }
 }
