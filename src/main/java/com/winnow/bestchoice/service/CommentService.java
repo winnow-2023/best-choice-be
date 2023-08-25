@@ -15,8 +15,12 @@ import com.winnow.bestchoice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CommentService {
 
@@ -81,5 +85,22 @@ public class CommentService {
 
         comment.setLikeCount(comment.getLikeCount() - 1);
         commentLikeRepository.delete(commentLike);
+    }
+
+    public void deleteComment(Authentication authentication, long commentId) { //comment에 삭제일만 넣어줌 - 추후 변경
+        long memberId = tokenProvider.getMemberId(authentication);
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+        if (comment.getMember().getId() != memberId || comment.getDeletedDate() != null) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        comment.setDeletedDate(LocalDateTime.now());
     }
 }
