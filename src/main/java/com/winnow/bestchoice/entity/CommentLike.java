@@ -12,9 +12,9 @@ import java.time.LocalDateTime;
 @Setter @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "COMMENT")
+@Table(name = "COMMENT_LIKE")
 @EntityListeners(AuditingEntityListener.class)
-public class Comment {
+public class CommentLike {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,19 +24,15 @@ public class Comment {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
-    private Post post;
-
-    @Column(nullable = false, name = "content")
-    private String content;
-
-    @Column(name = "like_count")
-    private long likeCount;
+    @JoinColumn(name = "comment_id")
+    private Comment comment;
 
     @CreatedDate
     @Column(nullable = false, name = "created_date")
     private LocalDateTime createdDate;
 
-    @Column(name = "deleted_date")
-    private LocalDateTime deletedDate;
+    public CommentLike(Member member, Comment comment) {
+        this.member = member;
+        this.comment = comment;
+    }
 }
