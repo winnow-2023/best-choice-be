@@ -23,4 +23,12 @@ public class CommentController {
 
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/{commentId}/unlike")
+    public ResponseEntity<?> unlikeComment(Authentication authentication, @PathVariable long commentId) {
+
+        commentService.unlikeComment(authentication, commentId);
+
+        return ResponseEntity.ok().build();
+    }
 }

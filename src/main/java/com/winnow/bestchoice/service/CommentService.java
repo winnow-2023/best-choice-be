@@ -64,4 +64,22 @@ public class CommentService {
         comment.setLikeCount(comment.getLikeCount() + 1);
         commentLikeRepository.save(new CommentLike(member, comment));
     }
+
+    public void unlikeComment(Authentication authentication, long commentId) {
+        long memberId = tokenProvider.getMemberId(authentication);
+
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        Member member = memberRepository.getReferenceById(memberId);
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+
+        CommentLike commentLike = commentLikeRepository.findByCommentAndMember(comment, member)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
+
+        comment.setLikeCount(comment.getLikeCount() - 1);
+        commentLikeRepository.delete(commentLike);
+    }
 }
