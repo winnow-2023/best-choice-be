@@ -35,6 +35,12 @@ public class Post {
     @Column(nullable = false, name = "optionB")
     private String optionB;
 
+    @Column(name = "ACount")
+    private long ACount;
+
+    @Column(name = "BCount")
+    private long BCount;
+
     @Column(name = "like_count")
     private long likeCount;
 

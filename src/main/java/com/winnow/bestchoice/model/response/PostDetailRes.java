@@ -24,8 +24,8 @@ public class PostDetailRes {
     private LocalDateTime createdDate;
     private LocalDateTime popularityDate;
     private long likeCount;
-    private int ACount;
-    private int BCount;
+    private long ACount;
+    private long BCount;
     private String liveChatUrl;
     private String liveChatUserCount;
 
@@ -36,7 +36,10 @@ public class PostDetailRes {
                 .content(post.getContent())
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
+                .ACount(post.getACount())
+                .BCount(post.getBCount())
                 .createdDate(post.getCreatedDate())
+                .popularityDate(post.getPopularityDate())
                 .build();
     }
 }

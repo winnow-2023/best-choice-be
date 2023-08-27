@@ -10,5 +10,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     @EntityGraph(attributePaths = "member") //member 같이 조회 - 조회 컬럼 최적화하기
-    Page<Comment> findByPost(Post post, Pageable pageable);
+    Page<Comment> findByPost_Id(long post_id, Pageable pageable);
 }

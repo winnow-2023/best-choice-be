@@ -119,6 +119,8 @@ public class PostService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
+        //TODO update optionCount in post
+
         choiceRepository.save(Choice.builder()
                 .member(member)
                 .post(post)

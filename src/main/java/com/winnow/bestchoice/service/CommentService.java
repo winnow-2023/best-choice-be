@@ -115,9 +115,7 @@ public class CommentService {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
 
-        Post post = postRepository.getReferenceById(postId);
-
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort.getValue()));
-        return commentRepository.findByPost(post, pageRequest).map(CommentRes::of);
+        return commentRepository.findByPost_Id(postId, pageRequest).map(CommentRes::of);
     }
 }
