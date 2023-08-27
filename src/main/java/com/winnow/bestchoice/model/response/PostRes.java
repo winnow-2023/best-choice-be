@@ -7,42 +7,38 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter @Setter
 @Builder
-public class PostDetailRes {
+public class PostRes {
 
     private long postId;
     private MemberRes member;
     private String title;
-    private String content;
     private String optionA;
     private String optionB;
-    private List<String> resources;
     private List<String> tags;
     private LocalDateTime createdDate;
     private LocalDateTime popularityDate;
-    private long ACount;
-    private long BCount;
     private long likeCount;
+    private long choiceCount;
     private long commentCount;
-    private String liveChatUrl;
-    private String liveChatUserCount;
+    private boolean chattingActive;
 
-    public static PostDetailRes of(Post post) {
-        return PostDetailRes.builder()
+    public static PostRes of(Post post) {
+        return PostRes.builder()
                 .postId(post.getId())
                 .member(MemberRes.of(post.getMember()))
                 .title(post.getTitle())
-                .content(post.getContent())
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
-                .ACount(post.getACount())
-                .BCount(post.getBCount())
-                .likeCount(post.getLikeCount())
-                .commentCount(post.getCommentCount())
+                .tags(post.getPostTags().stream().map(pt -> pt.getTag().getName()).collect(Collectors.toList()))
                 .createdDate(post.getCreatedDate())
                 .popularityDate(post.getPopularityDate())
+                .likeCount(post.getLikeCount())
+                .choiceCount(post.getACount() + post.getBCount())
+                .commentCount(post.getCommentCount())
                 .build();
     }
 }
