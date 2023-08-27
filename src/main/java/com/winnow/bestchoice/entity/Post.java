@@ -6,6 +6,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Builder
@@ -22,6 +23,9 @@ public class Post {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
     private Member member;
+
+    @OneToMany(mappedBy = "post")
+    private List<PostTag> postTags;
 
     @Column(nullable = false, name = "title")
     private String title;
@@ -43,6 +47,9 @@ public class Post {
 
     @Column(name = "like_count")
     private long likeCount;
+
+    @Column(name = "comment_count")
+    private long commentCount;
 
     @CreatedDate
     @Column(nullable = false, name = "created_date")

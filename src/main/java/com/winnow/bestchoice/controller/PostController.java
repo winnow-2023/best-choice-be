@@ -7,11 +7,9 @@ import com.winnow.bestchoice.service.CommentService;
 import com.winnow.bestchoice.service.PostService;
 import com.winnow.bestchoice.type.CommentSort;
 import com.winnow.bestchoice.type.Option;
+import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -77,6 +75,14 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostDetail(@PathVariable long postId) {
         return ResponseEntity.ok(postService.getPostDetail(postId));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getPosts(@RequestParam(defaultValue = "0") int page,
+                                      @RequestParam(defaultValue = "10") int size,
+                                      @RequestParam(defaultValue = "LATEST") PostSort sort) {
+
+        return ResponseEntity.ok().body(postService.getPosts(page, size, sort));
     }
 
     @GetMapping("/{postId}/comments")

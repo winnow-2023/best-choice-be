@@ -6,9 +6,14 @@ import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
+import com.winnow.bestchoice.model.response.PostRes;
 import com.winnow.bestchoice.repository.*;
 import com.winnow.bestchoice.type.Option;
+import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -135,5 +140,11 @@ public class PostService {
         postDetail.setResources(Collections.emptyList());
 
         return postDetail;
+    }
+
+    public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort.getValue()));
+
+        return postRepository.findSliceBy(pageRequest).map(PostRes::of);
     }
 }
