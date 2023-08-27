@@ -13,8 +13,7 @@ import java.util.List;
 public class PostDetailRes {
 
     private long postId;
-    private long memberId;
-    private String nickname;
+    private MemberRes member;
     private String title;
     private String content;
     private String optionA;
@@ -24,19 +23,23 @@ public class PostDetailRes {
     private LocalDateTime createdDate;
     private LocalDateTime popularityDate;
     private long likeCount;
-    private int ACount;
-    private int BCount;
+    private long ACount;
+    private long BCount;
     private String liveChatUrl;
     private String liveChatUserCount;
 
     public static PostDetailRes of(Post post) {
         return PostDetailRes.builder()
                 .postId(post.getId())
+                .member(MemberRes.of(post.getMember()))
                 .title(post.getTitle())
                 .content(post.getContent())
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
+                .ACount(post.getACount())
+                .BCount(post.getBCount())
                 .createdDate(post.getCreatedDate())
+                .popularityDate(post.getPopularityDate())
                 .build();
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -60,8 +61,6 @@ public class PostService {
         ArrayList<String> resources = new ArrayList<>();
 
         PostDetailRes postDetail = PostDetailRes.of(post);
-        postDetail.setMemberId(member.getId());
-        postDetail.setNickname(member.getNickname());
         postDetail.setTags(tags);
         postDetail.setResources(resources);
 
@@ -119,9 +118,22 @@ public class PostService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
+        //TODO update optionCount in post
+
         choiceRepository.save(Choice.builder()
                 .member(member)
                 .post(post)
                 .option(choice).build());
+    }
+
+    public PostDetailRes getPostDetail(long postId) { // 최적화
+        Post post = postRepository.findWithMemberById(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        PostDetailRes postDetail = PostDetailRes.of(post);
+        postDetail.setTags(Collections.emptyList());
+        postDetail.setResources(Collections.emptyList());
+
+        return postDetail;
     }
 }
