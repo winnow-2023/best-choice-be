@@ -13,8 +13,7 @@ import java.util.List;
 public class PostDetailRes {
 
     private long postId;
-    private long memberId;
-    private String nickname;
+    private MemberRes member;
     private String title;
     private String content;
     private String optionA;
@@ -32,6 +31,7 @@ public class PostDetailRes {
     public static PostDetailRes of(Post post) {
         return PostDetailRes.builder()
                 .postId(post.getId())
+                .member(MemberRes.of(post.getMember()))
                 .title(post.getTitle())
                 .content(post.getContent())
                 .optionA(post.getOptionA())

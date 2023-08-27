@@ -74,6 +74,11 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/{postId}")
+    public ResponseEntity<?> getPostDetail(@PathVariable long postId) {
+        return ResponseEntity.ok(postService.getPostDetail(postId));
+    }
+
     @GetMapping("/{postId}/comments")
     public ResponseEntity<?> getComments(@PathVariable long postId, @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size,
