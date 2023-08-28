@@ -44,6 +44,8 @@ public class Member implements UserDetails {
     @Column(nullable = false, name = "created_date")
     private LocalDateTime createdDate;
 
+    public Member(Long id) {this.id = id;}
+
     @LastModifiedDate
     @Column(nullable = false, name = "modified_date")
     private LocalDateTime modifiedDate;

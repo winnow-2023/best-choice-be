@@ -66,43 +66,43 @@ public class PostService {
         ArrayList<String> resources = new ArrayList<>();
 
         PostDetailRes postDetail = PostDetailRes.of(post);
-        postDetail.setTags(tags);
         postDetail.setResources(resources);
 
         return postDetail;
     }
 
-    public void likePost(Authentication authentication, long postId) { //최적화 @DynamicUpdate?
+    public void likePost(Authentication authentication, long postId) {
         Long memberId = tokenProvider.getMemberId(authentication);
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
-
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
-        if (postLikeRepository.existsByPostAndMember(post, member)) {
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        if (!postRepository.existsById(postId)) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+        if (postLikeRepository.existsByPost_IdAndMember_Id(postId, memberId)) { //left outer join으로 나감 - 최적화
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        post.setLikeCount(post.getLikeCount() + 1);
-        postLikeRepository.save(new PostLike(member, post));
+        postLikeRepository.save(new PostLike(new Member(memberId), new Post(postId)));
+        postRepository.plusLikeCountById(postId);
     }
 
     public void unlikePost(Authentication authentication, long postId) { //최적화
         Long memberId = tokenProvider.getMemberId(authentication);
 
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        if (!memberRepository.existsById(memberId)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+        if (!postRepository.existsById(postId)) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
 
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-
-        PostLike postLike = postLikeRepository.findByPostAndMember(post, member)
+        PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)//left outer join으로 나감 - 최적화
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
-        post.setLikeCount(post.getLikeCount() - 1);
         postLikeRepository.delete(postLike);
+        postRepository.minusLikeCountById(postId);
     }
 
     public void choiceOption(Authentication authentication, long postId, Option choice) {
@@ -123,12 +123,16 @@ public class PostService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        //TODO update optionCount in post
-
         choiceRepository.save(Choice.builder()
                 .member(member)
                 .post(post)
                 .option(choice).build());
+
+        switch (choice) {
+            case A : postRepository.plusACountById(postId); break;
+            case B : postRepository.plusBCountById(postId); break;
+            default: throw new IllegalStateException("Unexpected value: " + choice);
+        }
     }
 
     public PostDetailRes getPostDetail(long postId) { // 최적화

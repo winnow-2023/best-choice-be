@@ -17,7 +17,6 @@ import com.winnow.bestchoice.type.CommentSort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -62,17 +61,18 @@ public class CommentService {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
-
+        if (!commentRepository.existsById(commentId)) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+        }
         Member member = memberRepository.getReferenceById(memberId);
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+        Comment comment = commentRepository.getReferenceById(commentId);
 
         if (commentLikeRepository.existsByCommentAndMember(comment, member)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        comment.setLikeCount(comment.getLikeCount() + 1);
         commentLikeRepository.save(new CommentLike(member, comment));
+        commentRepository.plusLikeCountById(commentId);
     }
 
     public void unlikeComment(Authentication authentication, long commentId) {
@@ -81,16 +81,17 @@ public class CommentService {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
-
+        if (!commentRepository.existsById(commentId)) {
+            throw new CustomException(ErrorCode.COMMENT_NOT_FOUND);
+        }
         Member member = memberRepository.getReferenceById(memberId);
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
+        Comment comment = commentRepository.getReferenceById(commentId);
 
         CommentLike commentLike = commentLikeRepository.findByCommentAndMember(comment, member)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
-        comment.setLikeCount(comment.getLikeCount() - 1);
         commentLikeRepository.delete(commentLike);
+        commentRepository.minusLikeCountById(commentId);
     }
 
     public void deleteComment(Authentication authentication, long commentId) { //comment에 삭제일만 넣어줌 - 추후 변경
