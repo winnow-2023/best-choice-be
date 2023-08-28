@@ -62,4 +62,6 @@ public class Post {
 
     @Column(name = "deleted")
     private boolean deleted;
+
+    public Post(Long id) {this.id = id;}
 }
