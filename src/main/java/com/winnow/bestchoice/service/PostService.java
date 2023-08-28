@@ -136,7 +136,6 @@ public class PostService {
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
         PostDetailRes postDetail = PostDetailRes.of(post);
-        postDetail.setTags(Collections.emptyList());
         postDetail.setResources(Collections.emptyList());
 
         return postDetail;
