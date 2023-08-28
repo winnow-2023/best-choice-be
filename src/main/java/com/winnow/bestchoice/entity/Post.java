@@ -1,5 +1,6 @@
 package com.winnow.bestchoice.entity;
 
+import com.winnow.bestchoice.config.converter.TagsToJsonConverter;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -24,9 +25,6 @@ public class Post {
     @JoinColumn(name = "member_id")
     private Member member;
 
-    @OneToMany(mappedBy = "post")
-    private List<PostTag> postTags;
-
     @Column(nullable = false, name = "title")
     private String title;
 
@@ -38,6 +36,10 @@ public class Post {
 
     @Column(nullable = false, name = "optionB")
     private String optionB;
+
+    @Column(name = "tags")
+    @Convert(converter = TagsToJsonConverter.class)
+    private List<String> tags;
 
     @Column(name = "ACount")
     private long ACount;

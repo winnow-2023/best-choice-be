@@ -30,8 +30,7 @@ public class CreatePostForm {
                 .content(this.content)
                 .optionA(this.optionA)
                 .optionB(this.optionB)
-                .likeCount(0)
-                .deleted(false)
+                .tags(this.tags)
                 .build();
     }
 }

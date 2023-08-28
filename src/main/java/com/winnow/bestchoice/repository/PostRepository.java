@@ -13,6 +13,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @EntityGraph(attributePaths = "member")
     Optional<Post> findWithMemberById(long postId);
 
-    @EntityGraph(attributePaths = {"member", "postTags", "postTags.tag"})
+    @EntityGraph(attributePaths = "member")
     Slice<Post> findSliceBy(Pageable pageable);
 }

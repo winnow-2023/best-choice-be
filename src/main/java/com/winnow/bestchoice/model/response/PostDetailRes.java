@@ -37,6 +37,7 @@ public class PostDetailRes {
                 .content(post.getContent())
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
+                .tags(post.getTags())
                 .ACount(post.getACount())
                 .BCount(post.getBCount())
                 .likeCount(post.getLikeCount())

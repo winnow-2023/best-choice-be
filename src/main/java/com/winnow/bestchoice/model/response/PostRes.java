@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter @Setter
 @Builder
@@ -33,7 +32,7 @@ public class PostRes {
                 .title(post.getTitle())
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
-                .tags(post.getPostTags().stream().map(pt -> pt.getTag().getName()).collect(Collectors.toList()))
+                .tags(post.getTags())
                 .createdDate(post.getCreatedDate())
                 .popularityDate(post.getPopularityDate())
                 .likeCount(post.getLikeCount())
