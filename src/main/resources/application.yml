@@ -35,7 +35,7 @@ spring:
             client-secret: ${NAVER_CLIENT_SECRET}
             client-authentication-method: post
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:8080/oauth2/code/naver
+            redirect-uri: http://3.39.67.113:8080/oauth2/code/naver
             scope:
               - nickname
               - email
@@ -45,7 +45,7 @@ spring:
             clientSecret: ${KAKAO_CLIENT_SECRET}
             clientAuthenticationMethod: post
             authorizationGrantType: authorization_code
-            redirectUri: http://localhost:8080/oauth2/code/kakao
+            redirectUri: http://3.39.67.113:8080/oauth2/code/kakao
             scope:
               - profile_nickname
               - account_email
