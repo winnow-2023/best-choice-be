@@ -8,6 +8,6 @@ public class TestController {
     
     @GetMapping("/")
     public String index() {
-        return "환영합니다 베스트초이스 백엔드 서버입니다. ^_^";
+        return "환영합니다 베스트초이스 백엔드 서버입니다.";
     }
 }
