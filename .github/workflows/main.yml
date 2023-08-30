@@ -24,7 +24,7 @@ jobs:
         distribution: 'temurin'
         
     - name: Set up MySQL
-      uses: actions/mysql-action@v2
+      uses: bestchoice/mysql-action@v2
       with: 
         host port: 3306
         character set server: 'utf8'
