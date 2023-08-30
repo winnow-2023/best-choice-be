@@ -8,8 +8,6 @@ on:
 
 env:
   S3_BUCKET_NAME: bestchoice-deploy
-  
-permissions: write-all
 
 jobs:
   build:
