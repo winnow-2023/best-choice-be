@@ -23,6 +23,14 @@ jobs:
         java-version: '11'
         distribution: 'temurin'
         
+    - name: Set up MySQL
+      uses: bestchoice/mysql-action@v1
+      with: 
+        character set server: 'utf8'
+        mysql database: 'bestchoice'
+        mysql user: 'admin'
+        mysql password: 'winnow2023!'
+        
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
     
