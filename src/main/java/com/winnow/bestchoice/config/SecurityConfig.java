@@ -31,7 +31,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Arrays;
 
-import static org.springframework.boot.autoconfigure.security.servlet.PathRequest.toH2Console;
 
 @RequiredArgsConstructor
 @Configuration
@@ -50,8 +49,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public WebSecurityCustomizer configure() {
         return (web -> web.ignoring()
-                .requestMatchers(toH2Console())
-                .antMatchers("img/**", "/css/**", "/js/**", "/resources/**"));
+//                .requestMatchers(toH2Console())
+                .antMatchers("/img/**", "/css/**", "/js/**", "/resources/**"));
     }
 
     @Override
@@ -71,7 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                    .antMatchers("/h2-console/**", "/login").permitAll()
+                    .antMatchers("/login").permitAll()
                     .antMatchers("/api/**").authenticated()
                     .anyRequest().permitAll()
                 .and()
