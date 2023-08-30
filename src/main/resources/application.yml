@@ -88,4 +88,4 @@ cors:
   max-age: 3600
 
 server:
-  port: 80
+  port: 8081
