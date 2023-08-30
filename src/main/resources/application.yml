@@ -25,7 +25,7 @@ spring:
           google:
             client-id: ${GOOGLE_CLIENT_ID}
             client-secret: ${GOOGLE_CLIENT_SECRET}
-            redirect-uri: http:/www.winnow-bestchoice.com/oauth2/code/google
+            redirect-uri: http://www.winnow-bestchoice.com:8081/oauth2/code/google
             authorization-grant-type: authorization_code
             scope:
               - profile
@@ -35,7 +35,7 @@ spring:
             client-secret: ${NAVER_CLIENT_SECRET}
             client-authentication-method: post
             authorization-grant-type: authorization_code
-            redirect-uri: http:/www.winnow-bestchoice.com/oauth2/code/naver
+            redirect-uri: http://www.winnow-bestchoice.com:8081/oauth2/code/naver
             scope:
               - nickname
               - email
@@ -45,7 +45,7 @@ spring:
             clientSecret: ${KAKAO_CLIENT_SECRET}
             clientAuthenticationMethod: post
             authorizationGrantType: authorization_code
-            redirectUri: http:/www.winnow-bestchoice.com/oauth2/code/kakao
+            redirectUri: http://www.winnow-bestchoice.com:8081/oauth2/code/kakao
             scope:
               - profile_nickname
               - account_email
@@ -82,10 +82,10 @@ jwt:
 
 # cors 설정
 cors:
-  allowed-origins: http:/www.winnow-bestchoice.com:3000
+  allowed-origins: http://www.winnow-bestchoice.com:3000
   allowed-methods: GET,POST,PUT,DELETE,OPTIONS
   allowed-headers: '*'
   max-age: 3600
 
 server:
-  port: 80
+  port: 8081
