@@ -8,6 +8,8 @@ on:
 
 env:
   S3_BUCKET_NAME: bestchoice-deploy
+  
+permissions: write-all
 
 jobs:
   build:
@@ -24,8 +26,10 @@ jobs:
         distribution: 'temurin'
         
     - name: Set up MySQL
-      uses: bestchoice/mysql-action@v1
+      uses: actions/mysql-action@v2
       with: 
+        host port: 8080
+        container port: 3306
         character set server: 'utf8'
         mysql database: 'bestchoice'
         mysql user: 'admin'
