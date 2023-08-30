@@ -8,6 +8,7 @@ import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.model.response.PostRes;
 import com.winnow.bestchoice.repository.*;
+import com.winnow.bestchoice.type.MyPageSort;
 import com.winnow.bestchoice.type.Option;
 import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
@@ -149,5 +150,23 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort.getValue()));
 
         return postRepository.findSliceBy(pageRequest).map(PostRes::of);
+    }
+
+    public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
+        Long memberId = tokenProvider.getMemberId(authentication);
+        Member member = memberRepository.getReferenceById(memberId);
+
+        Slice<Post> postSlice = null;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+
+        switch (sort) {
+            case POSTS : postSlice = postRepository.findSliceByMember(member, pageRequest); break;
+            case LIKES : postSlice = postRepository.findSliceFromPostLike(member, pageRequest); break;
+            case CHOICES : postSlice = postRepository.findSliceFromChoice(member, pageRequest); break;
+            case COMMENTS : postSlice = postRepository.findSliceFromComment(member, pageRequest); break;
+            default: throw new IllegalStateException("Unexpected value: " + sort);
+        }
+
+        return postSlice.map(PostRes::of);
     }
 }

@@ -6,6 +6,7 @@ import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.service.CommentService;
 import com.winnow.bestchoice.service.PostService;
 import com.winnow.bestchoice.type.CommentSort;
+import com.winnow.bestchoice.type.MyPageSort;
 import com.winnow.bestchoice.type.Option;
 import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
@@ -91,5 +92,14 @@ public class PostController {
                                          @RequestParam(defaultValue = "LATEST") CommentSort sort) {
 
         return ResponseEntity.ok(commentService.getComments(postId, page, size, sort));
+    }
+
+    @GetMapping("/my")
+    public ResponseEntity<?> getMyPage(Authentication authentication,
+                                       @RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size,
+                                       @RequestParam(defaultValue = "LIKES") MyPageSort sort) {
+
+        return ResponseEntity.ok().body(postService.getMyPage(authentication, page, size, sort));
     }
 }

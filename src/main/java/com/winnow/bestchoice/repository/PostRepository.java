@@ -1,5 +1,6 @@
 package com.winnow.bestchoice.repository;
 
+import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -33,4 +34,19 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("update Post p set p.BCount=p.BCount+1 where p.id=:id")
     void plusBCountById(long id);
+
+    @EntityGraph(attributePaths = "member")
+    Slice<Post> findSliceByMember(Member member, Pageable pageable);
+
+    @EntityGraph(attributePaths = "member")
+    @Query("select pl.post from PostLike pl where pl.member=:member")
+    Slice<Post> findSliceFromPostLike(Member member, Pageable pageable);
+
+    @EntityGraph(attributePaths = "member")
+    @Query("select c.post from Comment c where c.member=:member")
+    Slice<Post> findSliceFromComment(Member member, Pageable pageable);
+
+    @EntityGraph(attributePaths = "member")
+    @Query("select c.post from Choice c where c.member=:member")
+    Slice<Post> findSliceFromChoice(Member member, Pageable pageable);
 }
