@@ -18,6 +18,10 @@ spring:
       hibernate.format_sql: true
   #            dialect: org.hibernate.dialect.MySQL8InnoDBDialect
 
+#API KEYS
+  profiles:
+    include: API-KEY
+
   security:
     oauth2:
       client:
