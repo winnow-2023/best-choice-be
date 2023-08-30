@@ -28,8 +28,7 @@ jobs:
     - name: Set up MySQL
       uses: actions/mysql-action@v2
       with: 
-        host port: 8080
-        container port: 3306
+        host port: 3306
         character set server: 'utf8'
         mysql database: 'bestchoice'
         mysql user: 'admin'
