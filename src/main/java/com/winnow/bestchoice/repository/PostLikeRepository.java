@@ -1,7 +1,5 @@
 package com.winnow.bestchoice.repository;
 
-import com.winnow.bestchoice.entity.Member;
-import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.entity.PostLike;
 import org.springframework.data.jpa.repository.JpaRepository;
 

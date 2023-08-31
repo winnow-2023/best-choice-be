@@ -4,6 +4,8 @@ import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.model.dto.PostDetailDto;
+import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.model.response.PostRes;
@@ -30,6 +32,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
@@ -42,7 +45,6 @@ public class PostService {
         if (files.size() > 5) { //첨부파일 5개 초과하는 경우
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-
         long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId).
@@ -92,14 +94,7 @@ public class PostService {
     public void unlikePost(Authentication authentication, long postId) { //최적화
         Long memberId = tokenProvider.getMemberId(authentication);
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        }
-        if (!postRepository.existsById(postId)) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
-
-        PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)//left outer join으로 나감 - 최적화
+        PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
         postLikeRepository.delete(postLike);
@@ -136,34 +131,31 @@ public class PostService {
         }
     }
 
-    public PostDetailRes getPostDetail(long postId) { // 최적화
-        Post post = postRepository.findWithMemberById(postId)
+    public PostDetailRes getPostDetail(long postId) {
+        PostDetailDto postDetailDto = postQueryRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        PostDetailRes postDetail = PostDetailRes.of(post);
-        postDetail.setResources(Collections.emptyList());
+        postDetailDto.setResources(Collections.emptyList()); //TODO S3 로직 구현 후 삭제
 
-        return postDetail;
+        return PostDetailRes.of(postDetailDto);
     }
 
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort.getValue()));
-
-        return postRepository.findSliceBy(pageRequest).map(PostRes::of);
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Slice<PostSummaryDto> slice = postQueryRepository.getSlice(pageRequest, sort.getType());
+        return slice.map(PostRes::of);
     }
 
     public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
         Long memberId = tokenProvider.getMemberId(authentication);
-        Member member = memberRepository.getReferenceById(memberId);
-
-        Slice<Post> postSlice = null;
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Slice<PostSummaryDto> postSlice;
 
         switch (sort) {
-            case POSTS : postSlice = postRepository.findSliceByMember(member, pageRequest); break;
-            case LIKES : postSlice = postRepository.findSliceFromPostLike(member, pageRequest); break;
-            case CHOICES : postSlice = postRepository.findSliceFromChoice(member, pageRequest); break;
-            case COMMENTS : postSlice = postRepository.findSliceFromComment(member, pageRequest); break;
+            case POSTS : postSlice = postQueryRepository.getSliceByMemberId(pageRequest, memberId); break;
+            case LIKES : postSlice = postQueryRepository.getSliceFromLikes(pageRequest, memberId); break;
+            case CHOICES : postSlice = postQueryRepository.getSliceFromChoices(pageRequest, memberId); break;
+            case COMMENTS : postSlice = postQueryRepository.getSliceFromComments(pageRequest, memberId); break;
             default: throw new IllegalStateException("Unexpected value: " + sort);
         }
 
