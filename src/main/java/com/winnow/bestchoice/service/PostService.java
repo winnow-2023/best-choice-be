@@ -16,10 +16,10 @@ import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
@@ -131,8 +131,12 @@ public class PostService {
         }
     }
 
-    public PostDetailRes getPostDetail(long postId) {
-        PostDetailDto postDetailDto = postQueryRepository.findById(postId)
+    public PostDetailRes getPostDetail(Authentication authentication, long postId) {
+        long memberId = 0;
+        if (!ObjectUtils.isEmpty(authentication)) {
+            memberId = tokenProvider.getMemberId(authentication);
+        }
+        PostDetailDto postDetailDto = postQueryRepository.getPostDetail(postId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
         postDetailDto.setResources(Collections.emptyList()); //TODO S3 로직 구현 후 삭제

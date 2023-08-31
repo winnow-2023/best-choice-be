@@ -42,13 +42,16 @@ public class PostQueryRepository {
         return getSlice(pageable, content);
     }
 
-    public Optional<PostDetailDto> findById(long postId) {
+    public Optional<PostDetailDto> getPostDetail(long postId, long memberId) {
         return Optional.ofNullable(jpaQueryFactory.select(Projections.bean(PostDetailDto.class,
                         post.id, member.id.as("memberId"), member.nickname
+                        , choice.option.as("myChoice"), postLike.isNotNull().as("liked")
                         , post.title, post.content, post.optionA, post.optionB, post.tags
                         , post.createdDate, post.popularityDate, post.likeCount
                         , post.ACount, post.BCount, post.commentCount))
                 .from(post).join(post.member, member)
+                .leftJoin(choice).on(choice.post.eq(post), choice.member.id.eq(memberId))
+                .leftJoin(postLike).on(postLike.post.eq(post), postLike.member.id.eq(memberId))
                 .where(post.id.eq(postId))
                 .fetchOne());
     }

@@ -2,6 +2,7 @@ package com.winnow.bestchoice.model.response;
 
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
+import com.winnow.bestchoice.type.Option;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,8 @@ public class PostDetailRes {
     private String content;
     private String optionA;
     private String optionB;
+    private Option myChoice;
+    private boolean liked;
     private List<String> tags;
     private List<String> resources;
     private LocalDateTime createdDate;
@@ -56,6 +59,8 @@ public class PostDetailRes {
                 .content(dto.getContent())
                 .optionA(dto.getOptionA())
                 .optionB(dto.getOptionB())
+                .myChoice(dto.getMyChoice())
+                .liked(dto.isLiked())
                 .tags(dto.getTags())
                 .resources(dto.getResources())
                 .ACount(dto.getACount())

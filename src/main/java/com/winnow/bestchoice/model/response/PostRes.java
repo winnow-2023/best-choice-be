@@ -1,6 +1,5 @@
 package com.winnow.bestchoice.model.response;
 
-import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,22 +23,6 @@ public class PostRes {
     private long choiceCount;
     private long commentCount;
     private boolean chattingActive;
-
-    public static PostRes of(Post post) {
-        return PostRes.builder()
-                .postId(post.getId())
-                .member(MemberRes.of(post.getMember()))
-                .title(post.getTitle())
-                .optionA(post.getOptionA())
-                .optionB(post.getOptionB())
-                .tags(post.getTags())
-                .createdDate(post.getCreatedDate())
-                .popularityDate(post.getPopularityDate())
-                .likeCount(post.getLikeCount())
-                .choiceCount(post.getACount() + post.getBCount())
-                .commentCount(post.getCommentCount())
-                .build();
-    }
 
     public static PostRes of(PostSummaryDto dto) {
         return PostRes.builder()
