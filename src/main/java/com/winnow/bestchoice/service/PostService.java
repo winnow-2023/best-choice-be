@@ -4,6 +4,7 @@ import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.model.response.PostRes;
@@ -30,6 +31,7 @@ import java.util.List;
 public class PostService {
 
     private final PostRepository postRepository;
+    private final PostQueryRepository postQueryRepository;
     private final MemberRepository memberRepository;
     private final TagRepository tagRepository;
     private final PostTagRepository postTagRepository;
@@ -42,7 +44,6 @@ public class PostService {
         if (files.size() > 5) { //첨부파일 5개 초과하는 경우
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-
         long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId).
@@ -147,9 +148,9 @@ public class PostService {
     }
 
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, sort.getValue()));
-
-        return postRepository.findSliceBy(pageRequest).map(PostRes::of);
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Slice<PostSummaryDto> slice = postQueryRepository.getSlice(pageRequest, sort.getType());
+        return slice.map(PostRes::of);
     }
 
     public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
