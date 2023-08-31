@@ -1,5 +1,6 @@
 package com.winnow.bestchoice.model.dto;
 
+import com.winnow.bestchoice.type.Option;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -16,6 +17,8 @@ public class PostDetailDto {
     private String content;
     private String optionA;
     private String optionB;
+    private Option myChoice;
+    private boolean liked;
     private List<String> tags;
     private List<String> resources;
     private LocalDateTime createdDate;
