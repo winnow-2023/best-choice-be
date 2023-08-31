@@ -4,6 +4,7 @@ import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
@@ -138,13 +139,16 @@ public class PostService {
     }
 
     public PostDetailRes getPostDetail(long postId) { // 최적화
-        Post post = postRepository.findWithMemberById(postId)
+//        Post post = postRepository.findWithMemberById(postId)
+//                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+//
+//        PostDetailRes postDetail = PostDetailRes.of(post);
+        PostDetailDto postDetailDto = postQueryRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        PostDetailRes postDetail = PostDetailRes.of(post);
-        postDetail.setResources(Collections.emptyList());
+        postDetailDto.setResources(Collections.emptyList()); //TODO S3 로직 구현 후 삭제
 
-        return postDetail;
+        return PostDetailRes.of(postDetailDto);
     }
 
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {

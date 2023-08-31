@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -12,6 +13,7 @@ import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static com.winnow.bestchoice.entity.QChoice.choice;
 import static com.winnow.bestchoice.entity.QComment.comment;
@@ -24,7 +26,7 @@ import static com.winnow.bestchoice.entity.QPostLike.postLike;
 public class PostQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {
+    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {//popularityDate null 제외 조회 처리
         List<PostSummaryDto> content = getPostSummaryDtosQuery()
                 .orderBy(type)
                 .offset(pageable.getOffset())
@@ -32,6 +34,17 @@ public class PostQueryRepository {
                 .fetch();
 
         return getSlice(pageable, content);
+    }
+
+    public Optional<PostDetailDto> findById(long postId) {
+        return Optional.ofNullable(jpaQueryFactory.select(Projections.bean(PostDetailDto.class,
+                        post.id, member.id.as("memberId"), member.nickname
+                        , post.title, post.content, post.optionA, post.optionB, post.tags
+                        , post.createdDate, post.popularityDate, post.likeCount
+                        , post.ACount, post.BCount, post.commentCount))
+                .from(post).join(post.member, member)
+                .where(post.id.eq(postId))
+                .fetchOne());
     }
 
     public Slice<PostSummaryDto> getSliceByMemberId(Pageable pageable, long memberId) {

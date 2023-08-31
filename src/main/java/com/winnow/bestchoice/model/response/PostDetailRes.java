@@ -1,6 +1,7 @@
 package com.winnow.bestchoice.model.response;
 
 import com.winnow.bestchoice.entity.Post;
+import com.winnow.bestchoice.model.dto.PostDetailDto;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,8 +19,8 @@ public class PostDetailRes {
     private String content;
     private String optionA;
     private String optionB;
-    private List<String> resources;
     private List<String> tags;
+    private List<String> resources;
     private LocalDateTime createdDate;
     private LocalDateTime popularityDate;
     private long ACount;
@@ -44,6 +45,25 @@ public class PostDetailRes {
                 .commentCount(post.getCommentCount())
                 .createdDate(post.getCreatedDate())
                 .popularityDate(post.getPopularityDate())
+                .build();
+    }
+
+    public static PostDetailRes of(PostDetailDto dto) {
+        return PostDetailRes.builder()
+                .postId(dto.getId())
+                .member(new MemberRes(dto.getMemberId(), dto.getNickname()))
+                .title(dto.getTitle())
+                .content(dto.getContent())
+                .optionA(dto.getOptionA())
+                .optionB(dto.getOptionB())
+                .tags(dto.getTags())
+                .resources(dto.getResources())
+                .ACount(dto.getACount())
+                .BCount(dto.getBCount())
+                .likeCount(dto.getLikeCount())
+                .commentCount(dto.getCommentCount())
+                .createdDate(dto.getCreatedDate())
+                .popularityDate(dto.getPopularityDate())
                 .build();
     }
 }
