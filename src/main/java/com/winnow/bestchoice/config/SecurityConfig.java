@@ -50,7 +50,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public WebSecurityCustomizer configure() {
         return (web -> web.ignoring()
 //                .requestMatchers(toH2Console())
-                .antMatchers("/h2-console/**") //test용 추후 삭제
+//                .antMatchers("/h2-console/**") //test용 추후 삭제
                 .antMatchers("/img/**", "/css/**", "/js/**", "/resources/**"));
     }
 

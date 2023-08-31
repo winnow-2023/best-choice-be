@@ -94,14 +94,7 @@ public class PostService {
     public void unlikePost(Authentication authentication, long postId) { //최적화
         Long memberId = tokenProvider.getMemberId(authentication);
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        }
-        if (!postRepository.existsById(postId)) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
-
-        PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)//left outer join으로 나감 - 최적화
+        PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
         postLikeRepository.delete(postLike);
@@ -138,11 +131,7 @@ public class PostService {
         }
     }
 
-    public PostDetailRes getPostDetail(long postId) { // 최적화
-//        Post post = postRepository.findWithMemberById(postId)
-//                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
-//
-//        PostDetailRes postDetail = PostDetailRes.of(post);
+    public PostDetailRes getPostDetail(long postId) {
         PostDetailDto postDetailDto = postQueryRepository.findById(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
