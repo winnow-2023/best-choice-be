@@ -155,16 +155,14 @@ public class PostService {
 
     public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
         Long memberId = tokenProvider.getMemberId(authentication);
-        Member member = memberRepository.getReferenceById(memberId);
-
-        Slice<Post> postSlice = null;
-        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
+        PageRequest pageRequest = PageRequest.of(page, size);
+        Slice<PostSummaryDto> postSlice;
 
         switch (sort) {
-            case POSTS : postSlice = postRepository.findSliceByMember(member, pageRequest); break;
-            case LIKES : postSlice = postRepository.findSliceFromPostLike(member, pageRequest); break;
-            case CHOICES : postSlice = postRepository.findSliceFromChoice(member, pageRequest); break;
-            case COMMENTS : postSlice = postRepository.findSliceFromComment(member, pageRequest); break;
+            case POSTS : postSlice = postQueryRepository.getSliceByMemberId(pageRequest, memberId); break;
+            case LIKES : postSlice = postQueryRepository.getSliceFromLikes(pageRequest, memberId); break;
+            case CHOICES : postSlice = postQueryRepository.getSliceFromChoices(pageRequest, memberId); break;
+            case COMMENTS : postSlice = postQueryRepository.getSliceFromComments(pageRequest, memberId); break;
             default: throw new IllegalStateException("Unexpected value: " + sort);
         }
 
