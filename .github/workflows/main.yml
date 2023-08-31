@@ -9,6 +9,7 @@ on:
 env:
   S3_BUCKET_NAME: bestchoice-deploy
 
+
 jobs:
   build:
 
@@ -22,6 +23,16 @@ jobs:
       with:
         java-version: '11'
         distribution: 'temurin'
+        
+    - name: Set up MySQL
+      uses: mirromutth/mysql-action@v1.1
+      with: 
+        host port: 3306
+        container port: 3306
+        character set server: 'utf8'
+        mysql database: 'bestchoice'
+        mysql user: 'admin'
+        mysql password: 'winnow2023!'
         
     - name: Grant execute permission for gradlew
       run: chmod +x gradlew
