@@ -14,15 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
+@Validated
 @Slf4j
 public class PostController {
 
@@ -32,7 +35,7 @@ public class PostController {
     @PostMapping
     public ResponseEntity<?> createPost(Authentication authentication,
                                         @Valid CreatePostForm createPostForm,
-                                        List<MultipartFile> files) {
+                                        @Size(max = 5) List<MultipartFile> files) {
 
         PostDetailRes postDetail = postService.createPost(createPostForm, files, authentication);
 
@@ -84,6 +87,14 @@ public class PostController {
                                       @RequestParam(defaultValue = "LATEST") PostSort sort) {
 
         return ResponseEntity.ok().body(postService.getPosts(page, size, sort));
+    }
+
+    @GetMapping("/tag")
+    public ResponseEntity<?> getPostsByTag(@RequestParam @Size(min = 2, max = 10) String tag,
+                                           @RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size) {
+
+        return ResponseEntity.ok(postService.getPostsByTag(page, size, tag));
     }
 
     @GetMapping("/{postId}/comments")
