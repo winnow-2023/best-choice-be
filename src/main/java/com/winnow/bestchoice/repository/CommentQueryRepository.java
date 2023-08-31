@@ -21,7 +21,7 @@ import static com.winnow.bestchoice.entity.QMember.member;
 public class CommentQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Page<CommentDto> getPageByPostId(Pageable pageable, OrderSpecifier<?> type, long postId) {
+    public Page<CommentDto> getPageByPostId(Pageable pageable, OrderSpecifier<?> type, long postId) {//TODO select query 추가
         List<CommentDto> content = jpaQueryFactory.select(Projections.bean(CommentDto.class,
                         comment.id, member.id.as("memberId"), member.nickname, choice.option,
                         comment.content, comment.likeCount, comment.createdDate, comment.deletedDate))

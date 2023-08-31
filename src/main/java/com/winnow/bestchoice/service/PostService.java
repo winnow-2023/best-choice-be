@@ -161,4 +161,10 @@ public class PostService {
 
         return postSlice.map(PostRes::of);
     }
+
+    public Slice<PostRes> getPostsByTag(int page, int size, String tag) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return postQueryRepository.getSliceByTag(pageRequest, tag).map(PostRes::of);
+    }
 }

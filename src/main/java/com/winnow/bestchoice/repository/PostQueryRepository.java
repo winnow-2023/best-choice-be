@@ -4,14 +4,18 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.winnow.bestchoice.entity.QPostTag;
+import com.winnow.bestchoice.entity.QTag;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +24,8 @@ import static com.winnow.bestchoice.entity.QComment.comment;
 import static com.winnow.bestchoice.entity.QMember.member;
 import static com.winnow.bestchoice.entity.QPost.post;
 import static com.winnow.bestchoice.entity.QPostLike.postLike;
+import static com.winnow.bestchoice.entity.QPostTag.postTag;
+import static com.winnow.bestchoice.entity.QTag.tag;
 
 @Repository
 @RequiredArgsConstructor
@@ -88,6 +94,18 @@ public class PostQueryRepository {
                 .join(choice).on(choice.post.eq(post))
                 .where(choice.member.id.eq(memberId))
                 .orderBy(choice.createdDate.desc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        return getSlice(pageable, content);
+    }
+
+    public Slice<PostSummaryDto> getSliceByTag(Pageable pageable, String tagName) {
+        List<PostSummaryDto> content = getPostSummaryDtosQuery()
+                .join(postTag).on(postTag.post.eq(post))
+                .join(tag).on(tag.name.eq(tagName), postTag.tag.eq(tag))
+                .orderBy(postTag.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
