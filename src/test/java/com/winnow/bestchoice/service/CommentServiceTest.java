@@ -3,11 +3,13 @@ package com.winnow.bestchoice.service;
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.config.properties.JwtProperties;
 import com.winnow.bestchoice.entity.Comment;
+import com.winnow.bestchoice.entity.CommentLike;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.request.CreateCommentForm;
+import com.winnow.bestchoice.repository.CommentLikeRepository;
 import com.winnow.bestchoice.repository.CommentRepository;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.repository.PostRepository;
@@ -35,10 +37,12 @@ class CommentServiceTest {
     @Mock MemberRepository memberRepository;
     @Mock PostRepository postRepository;
     @Mock CommentRepository commentRepository;
+    @Mock CommentLikeRepository commentLikeRepository;
     @Mock TokenProvider tokenProvider;
     Authentication authentication = setAuthentication();
     long memberId = 1L;
     long postId = 1L;
+    long commentId = 10L;
 
     @Test
     @DisplayName("댓글 작성 성공")
@@ -68,6 +72,22 @@ class CommentServiceTest {
                 () -> commentService.createComment(authentication, postId, form));
 
         Assertions.assertEquals(e.getErrorCode(), ErrorCode.POST_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("댓글 좋아요 성공")
+    void likeCommentSuccess() {
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(commentRepository.existsById(any())).willReturn(true);
+        given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
+        given(commentRepository.getReferenceById(anyLong())).willReturn(new Comment());
+        given(commentLikeRepository.existsByCommentAndMember(any(), any())).willReturn(false);
+
+        commentService.likeComment(authentication, commentId);
+
+        verify(commentLikeRepository).save(any(CommentLike.class));
+        verify(commentRepository).plusLikeCountById(commentId);
     }
 
 
