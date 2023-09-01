@@ -3,6 +3,7 @@ package com.winnow.bestchoice.service;
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.config.properties.JwtProperties;
 import com.winnow.bestchoice.entity.Member;
+import com.winnow.bestchoice.entity.PostLike;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.repository.MemberRepository;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -68,6 +70,22 @@ class PostServiceTest {
                 () -> postService.likePost(authentication, postId));
 
         Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+    }
+
+    @DisplayName("게시글 좋아요 취소 성공")
+    @Test
+    void unlikePostSuccess() {
+        long memberId = 1L;
+        long postId = 1L;
+        PostLike postLike = new PostLike();
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(postLikeRepository.findByPost_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.of(postLike));
+
+        postService.unlikePost(authentication, postId);
+
+        verify(postLikeRepository).delete(postLike);
+        verify(postRepository).minusLikeCountById(postId);
     }
 
     Authentication setAuthentication() {
