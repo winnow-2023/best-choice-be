@@ -3,9 +3,12 @@ package com.winnow.bestchoice.service;
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.config.properties.JwtProperties;
 import com.winnow.bestchoice.entity.Member;
+import com.winnow.bestchoice.exception.CustomException;
+import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.repository.PostLikeRepository;
 import com.winnow.bestchoice.repository.PostRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -48,6 +51,23 @@ class PostServiceTest {
 
         verify(postLikeRepository).save(any());
         verify(postRepository).plusLikeCountById(postId);
+    }
+
+    @DisplayName("게시글 좋아요 실패 - 이미 좋아요한 게시글")
+    @Test
+    void likePostFail() {
+        long memberId = 1L;
+        long postId = 1L;
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(postRepository.existsById(any())).willReturn(true);
+        given(postLikeRepository.existsByPost_IdAndMember_Id(anyLong(), anyLong())).willReturn(true);
+
+        CustomException e = Assertions.assertThrows(CustomException.class,
+                () -> postService.likePost(authentication, postId));
+
+        Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     Authentication setAuthentication() {
