@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -105,6 +106,24 @@ class CommentServiceTest {
 
         assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
+
+    @Test
+    @DisplayName("댓글 좋아요 취소 성공")
+    void unlikeCommentSuccess() {
+        CommentLike commentLike = new CommentLike();
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(commentRepository.existsById(any())).willReturn(true);
+        given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
+        given(commentRepository.getReferenceById(anyLong())).willReturn(new Comment());
+        given(commentLikeRepository.findByCommentAndMember(any(), any())).willReturn(Optional.of(commentLike));
+
+        commentService.unlikeComment(authentication, commentId);
+
+        verify(commentLikeRepository).delete(commentLike);
+        verify(commentRepository).minusLikeCountById(commentId);
+    }
+
 
 
 
