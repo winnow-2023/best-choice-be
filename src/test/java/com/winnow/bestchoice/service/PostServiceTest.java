@@ -8,10 +8,9 @@ import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.entity.PostLike;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
-import com.winnow.bestchoice.repository.ChoiceRepository;
-import com.winnow.bestchoice.repository.MemberRepository;
-import com.winnow.bestchoice.repository.PostLikeRepository;
-import com.winnow.bestchoice.repository.PostRepository;
+import com.winnow.bestchoice.model.dto.PostDetailDto;
+import com.winnow.bestchoice.model.response.PostDetailRes;
+import com.winnow.bestchoice.repository.*;
 import com.winnow.bestchoice.type.Option;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -27,6 +26,7 @@ import org.springframework.security.core.Authentication;
 import java.time.Duration;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -39,6 +39,7 @@ class PostServiceTest {
     @InjectMocks PostService postService;
     @Mock MemberRepository memberRepository;
     @Mock PostRepository postRepository;
+    @Mock PostQueryRepository postQueryRepository;
     @Mock PostLikeRepository postLikeRepository;
     @Mock ChoiceRepository choiceRepository;
     @Mock TokenProvider tokenProvider;
@@ -75,7 +76,7 @@ class PostServiceTest {
         CustomException e = Assertions.assertThrows(CustomException.class,
                 () -> postService.likePost(authentication, postId));
 
-        Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+        assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     @Test
@@ -106,7 +107,7 @@ class PostServiceTest {
         CustomException e = Assertions.assertThrows(CustomException.class,
                 () -> postService.unlikePost(authentication, postId));
 
-        Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+        assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     @Test
@@ -145,7 +146,23 @@ class PostServiceTest {
         CustomException e = Assertions.assertThrows(CustomException.class,
                 () -> postService.choiceOption(authentication, postId, Option.A));
 
-        Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+        assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+    }
+
+    @Test
+    @DisplayName("게시글 상세 조회 성공")
+    void getPostDetailSuccess() {
+        long memberId = 1L;
+        long postId = 1L;
+        PostDetailDto postDetailDto = new PostDetailDto();
+        postDetailDto.setId(postId);
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(postQueryRepository.getPostDetail(anyLong(), anyLong())).willReturn(Optional.of(postDetailDto));
+
+        PostDetailRes postDetail = postService.getPostDetail(authentication, postId);
+
+        assertEquals(postDetail.getPostId(), postId);
     }
 
     Authentication setAuthentication() {
