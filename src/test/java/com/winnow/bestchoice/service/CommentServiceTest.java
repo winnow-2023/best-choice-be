@@ -13,9 +13,7 @@ import com.winnow.bestchoice.repository.CommentLikeRepository;
 import com.winnow.bestchoice.repository.CommentRepository;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.repository.PostRepository;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -124,9 +122,19 @@ class CommentServiceTest {
         verify(commentRepository).minusLikeCountById(commentId);
     }
 
+    @Test
+    @DisplayName("댓글 좋아요 취소 실패 - 좋아요 누르지 않은 댓글")
+    void unlikeCommentFail() {
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(commentRepository.existsById(any())).willReturn(true);
+        given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
+        given(commentRepository.getReferenceById(anyLong())).willReturn(new Comment());
+        given(commentLikeRepository.findByCommentAndMember(any(), any())).willReturn(Optional.empty());
 
-
-
+        CustomException e = assertThrows(CustomException.class,
+                () -> commentService.unlikeComment(authentication, commentId));
+    }
 
     Authentication setAuthentication() {
         JwtProperties jwtProperties = new JwtProperties();
