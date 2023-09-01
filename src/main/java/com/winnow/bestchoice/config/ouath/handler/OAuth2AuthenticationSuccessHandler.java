@@ -92,7 +92,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // 액세스 토큰을 Path에 추가
     private String getTargetUrl(HttpServletRequest request, String token) {
-        String redirectPath = request.getServerName() + request.getServerPort();
+        String redirectPath = request.getServerName() + ":" + request.getServerPort();
         return UriComponentsBuilder.fromUriString(redirectPath)
                 .queryParam("token", token)
                 .build()
