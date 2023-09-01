@@ -83,7 +83,7 @@ public class PostService {
         if (!postRepository.existsById(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
-        if (postLikeRepository.existsByPost_IdAndMember_Id(postId, memberId)) { //left outer join으로 나감 - 최적화
+        if (postLikeRepository.existsByPost_IdAndMember_Id(postId, memberId)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
