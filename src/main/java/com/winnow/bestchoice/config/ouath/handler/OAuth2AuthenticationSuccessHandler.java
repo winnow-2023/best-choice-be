@@ -30,7 +30,7 @@ import java.time.Duration;
 public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
-    public static final String REDIRECT_PATH = "http://www.winnow-bestchoice.com:8080/oauth/redirect";
+    public static final String REDIRECT_PATH = "https://best-choice-steel.vercel.app";
     public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14); // 14일
     public static final Duration ACCESS_TOKEN_DURATION = Duration.ofDays(1); // 1일
 
