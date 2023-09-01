@@ -2,6 +2,7 @@ package com.winnow.bestchoice.model.request;
 
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,6 +11,7 @@ import javax.validation.constraints.Size;
 import java.util.List;
 
 @Getter @Setter
+@Builder
 public class CreatePostForm {
 
     @NotBlank
