@@ -17,7 +17,7 @@ import java.io.IOException;
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
-    private final static String REDIRECT_PATH = "http://www.winnow-bestchoce.com:8080/oauth/redirect";
+    private final static String REDIRECT_PATH = "https://best-choice-steel.vercel.app";
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
