@@ -21,6 +21,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.Authentication;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -134,11 +135,12 @@ class CommentServiceTest {
 
         CustomException e = assertThrows(CustomException.class,
                 () -> commentService.unlikeComment(authentication, commentId));
+        assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     @Test
     @DisplayName("댓글 삭제 성공")
-    void deleteComment() {
+    void deleteCommentSuccess() {
         Comment comment = new Comment();
         comment.setMember(new Member(memberId));
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
@@ -150,6 +152,21 @@ class CommentServiceTest {
         commentService.deleteComment(authentication, commentId);
 
         assertNotNull(comment.getDeletedDate());
+    }
+
+    @Test
+    @DisplayName("댓글 삭제 실패 - 이미 삭제된 댓글")
+    void deleteCommentFail() {
+        Comment comment = new Comment();
+        comment.setMember(new Member(memberId));
+        comment.setDeletedDate(LocalDateTime.now());
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(commentRepository.findById(anyLong())).willReturn(Optional.of(comment));
+
+        CustomException e = assertThrows(CustomException.class,
+                () -> commentService.deleteComment(authentication, commentId));
+        assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     Authentication setAuthentication() {
