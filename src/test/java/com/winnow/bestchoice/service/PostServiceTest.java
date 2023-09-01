@@ -9,8 +9,10 @@ import com.winnow.bestchoice.entity.PostLike;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
+import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.repository.*;
+import com.winnow.bestchoice.type.MyPageSort;
 import com.winnow.bestchoice.type.Option;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
@@ -21,9 +23,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.core.Authentication;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -181,6 +185,23 @@ class PostServiceTest {
                 () -> postService.getPostDetail(authentication, postId));
 
         assertEquals(e.getErrorCode(), ErrorCode.POST_NOT_FOUND);
+    }
+
+    @Test
+    @DisplayName("myPage 게시글 타입별 조회")
+    void getMyPageSuccess() {
+        long memberId = 1L;
+        SliceImpl<PostSummaryDto> slice = new SliceImpl<>(Collections.emptyList());
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(postQueryRepository.getSliceFromChoices(any(), anyLong())).willReturn(slice);
+
+        postService.getMyPage(authentication, 0, 10, MyPageSort.CHOICES);
+
+        verify(postQueryRepository).getSliceFromChoices(any(), anyLong());
+        verify(postQueryRepository, never()).getSliceFromComments(any(), anyLong());
+        verify(postQueryRepository, never()).getSliceFromLikes(any(), anyLong());
+        verify(postQueryRepository, never()).getSliceByMemberId(any(), anyLong());
+
     }
 
     Authentication setAuthentication() {
