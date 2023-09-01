@@ -120,12 +120,32 @@ class PostServiceTest {
         given(postRepository.existsById(any())).willReturn(true);
         given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
         given(postRepository.getReferenceById(anyLong())).willReturn(new Post(postId));
+        given(choiceRepository.existsByPostAndMember(any(), any())).willReturn(false);
 
         postService.choiceOption(authentication, postId, Option.A);
 
         verify(choiceRepository).save(any(Choice.class));
         verify(postRepository).plusACountById(postId);
         verify(postRepository, never()).plusBCountById(postId);
+    }
+
+    @Test
+    @DisplayName("게시글 옵션(A or B) 선택 실패 - 이미 옵션 선택한 게시글")
+    void choiceOptionFail() {
+        long memberId = 1L;
+        long postId = 1L;
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(postRepository.existsById(any())).willReturn(true);
+        given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
+        given(postRepository.getReferenceById(anyLong())).willReturn(new Post(postId));
+        given(choiceRepository.existsByPostAndMember(any(), any())).willReturn(true);
+
+        CustomException e = Assertions.assertThrows(CustomException.class,
+                () -> postService.choiceOption(authentication, postId, Option.A));
+
+        Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     Authentication setAuthentication() {
