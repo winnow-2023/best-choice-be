@@ -22,4 +22,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("update Post p set p.BCount=p.BCount+1 where p.id=:id")
     void plusBCountById(long id);
+
+    @Modifying
+    @Query("update Post p set p.commentCount=p.commentCount+1 where p.id=:id")
+    void plusCommentCountById(long id);
 }

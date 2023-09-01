@@ -50,6 +50,7 @@ public class CommentService {
                 .member(member)
                 .post(post)
                 .content(commentForm.getContent()).build());
+        postRepository.plusCommentCountById(postId);
     }
 
     public void likeComment(Authentication authentication, long commentId) {
