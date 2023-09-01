@@ -5,10 +5,13 @@ import com.winnow.bestchoice.config.properties.JwtProperties;
 import com.winnow.bestchoice.entity.Comment;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
+import com.winnow.bestchoice.exception.CustomException;
+import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.request.CreateCommentForm;
 import com.winnow.bestchoice.repository.CommentRepository;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.repository.PostRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,6 +54,20 @@ class CommentServiceTest {
 
         verify(commentRepository).save(any(Comment.class));
         verify(postRepository).plusCommentCountById(postId);
+    }
+
+    @Test
+    @DisplayName("댓글 작성 실패 - 존재하지 않는 게시글")
+    void createCommentFail() {
+        CreateCommentForm form = new CreateCommentForm();
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(postRepository.existsById(any())).willReturn(false);
+
+        CustomException e = assertThrows(CustomException.class,
+                () -> commentService.createComment(authentication, postId, form));
+
+        Assertions.assertEquals(e.getErrorCode(), ErrorCode.POST_NOT_FOUND);
     }
 
 
