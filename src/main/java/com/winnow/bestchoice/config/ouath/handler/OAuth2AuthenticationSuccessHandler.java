@@ -32,6 +32,7 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
     public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14); // 14일
     public static final Duration ACCESS_TOKEN_DURATION = Duration.ofDays(1); // 1일
+    private final static String REDIRECT_PATH = "https://best-choice-steel.vercel.app";
 
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
@@ -64,7 +65,6 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
         // 인증 관련 설정값, 쿠키 제거
         clearAuthenticationAttributes(request, response);
-
         // 리다이렉트
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
@@ -92,8 +92,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 
     // 액세스 토큰을 Path에 추가
     private String getTargetUrl(HttpServletRequest request, String token) {
-        String redirectPath = request.getServerName() + ":" + request.getServerPort();
-        return UriComponentsBuilder.fromUriString(redirectPath)
+        String redirectUrl= request.getRemoteAddr() + ":" + request.getRemotePort();
+        return UriComponentsBuilder.fromUriString(redirectUrl)
                 .queryParam("token", token)
                 .build()
                 .toUriString();
