@@ -136,6 +136,22 @@ class CommentServiceTest {
                 () -> commentService.unlikeComment(authentication, commentId));
     }
 
+    @Test
+    @DisplayName("댓글 삭제 성공")
+    void deleteComment() {
+        Comment comment = new Comment();
+        comment.setMember(new Member(memberId));
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(commentRepository.findById(anyLong())).willReturn(Optional.of(comment));
+
+        assertNull(comment.getDeletedDate());
+
+        commentService.deleteComment(authentication, commentId);
+
+        assertNotNull(comment.getDeletedDate());
+    }
+
     Authentication setAuthentication() {
         JwtProperties jwtProperties = new JwtProperties();
         jwtProperties.setIssuer("issuer");
