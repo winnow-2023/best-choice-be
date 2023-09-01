@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
@@ -163,6 +164,23 @@ class PostServiceTest {
         PostDetailRes postDetail = postService.getPostDetail(authentication, postId);
 
         assertEquals(postDetail.getPostId(), postId);
+    }
+
+    @Test
+    @DisplayName("게시글 상세 조회 실패 - 존재하지 않는 게시글")
+    void getPostDetailFail() {
+        long memberId = 1L;
+        long postId = 1L;
+        PostDetailDto postDetailDto = new PostDetailDto();
+        postDetailDto.setId(postId);
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(postQueryRepository.getPostDetail(anyLong(), anyLong())).willReturn(Optional.empty());
+
+        CustomException e = assertThrows(CustomException.class,
+                () -> postService.getPostDetail(authentication, postId));
+
+        assertEquals(e.getErrorCode(), ErrorCode.POST_NOT_FOUND);
     }
 
     Authentication setAuthentication() {
