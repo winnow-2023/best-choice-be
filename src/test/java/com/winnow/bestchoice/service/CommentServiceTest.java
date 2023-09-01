@@ -90,6 +90,21 @@ class CommentServiceTest {
         verify(commentRepository).plusLikeCountById(commentId);
     }
 
+    @Test
+    @DisplayName("댓글 좋아요 실패 - 이미 좋아요한 댓글")
+    void likeCommentFail() {
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(commentRepository.existsById(any())).willReturn(true);
+        given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
+        given(commentRepository.getReferenceById(anyLong())).willReturn(new Comment());
+        given(commentLikeRepository.existsByCommentAndMember(any(), any())).willReturn(true);
+
+        CustomException e = assertThrows(CustomException.class,
+                () -> commentService.likeComment(authentication, commentId));
+
+        assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+    }
 
 
 
