@@ -38,8 +38,8 @@ class PostServiceTest {
     @Mock TokenProvider tokenProvider;
     Authentication authentication = setAuthentication();
 
-    @DisplayName("게시글 좋아요 성공")
     @Test
+    @DisplayName("게시글 좋아요 성공")
     void likePostSuccess() {
         long memberId = 1L;
         long postId = 1L;
@@ -55,8 +55,8 @@ class PostServiceTest {
         verify(postRepository).plusLikeCountById(postId);
     }
 
-    @DisplayName("게시글 좋아요 실패 - 이미 좋아요한 게시글")
     @Test
+    @DisplayName("게시글 좋아요 실패 - 이미 좋아요한 게시글")
     void likePostFail() {
         long memberId = 1L;
         long postId = 1L;
@@ -72,8 +72,8 @@ class PostServiceTest {
         Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
-    @DisplayName("게시글 좋아요 취소 성공")
     @Test
+    @DisplayName("게시글 좋아요 취소 성공")
     void unlikePostSuccess() {
         long memberId = 1L;
         long postId = 1L;
@@ -86,6 +86,21 @@ class PostServiceTest {
 
         verify(postLikeRepository).delete(postLike);
         verify(postRepository).minusLikeCountById(postId);
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 취소 실패 - 좋아요 누르지 않은 게시글에 취소 시도")
+    void unlikePostFail() {
+        long memberId = 1L;
+        long postId = 1L;
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(postLikeRepository.findByPost_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.empty());
+
+        CustomException e = Assertions.assertThrows(CustomException.class,
+                () -> postService.unlikePost(authentication, postId));
+
+        Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
     }
 
     Authentication setAuthentication() {
