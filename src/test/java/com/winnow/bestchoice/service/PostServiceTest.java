@@ -2,13 +2,17 @@ package com.winnow.bestchoice.service;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.config.properties.JwtProperties;
+import com.winnow.bestchoice.entity.Choice;
 import com.winnow.bestchoice.entity.Member;
+import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.entity.PostLike;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.repository.ChoiceRepository;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.repository.PostLikeRepository;
 import com.winnow.bestchoice.repository.PostRepository;
+import com.winnow.bestchoice.type.Option;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +30,7 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,6 +40,7 @@ class PostServiceTest {
     @Mock MemberRepository memberRepository;
     @Mock PostRepository postRepository;
     @Mock PostLikeRepository postLikeRepository;
+    @Mock ChoiceRepository choiceRepository;
     @Mock TokenProvider tokenProvider;
     Authentication authentication = setAuthentication();
 
@@ -101,6 +107,25 @@ class PostServiceTest {
                 () -> postService.unlikePost(authentication, postId));
 
         Assertions.assertEquals(e.getErrorCode(), ErrorCode.INVALID_REQUEST);
+    }
+
+    @Test
+    @DisplayName("게시글 옵션(A or B) 선택 성공")
+    void choiceOptionSuccess() {
+        long memberId = 1L;
+        long postId = 1L;
+
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.existsById(any())).willReturn(true);
+        given(postRepository.existsById(any())).willReturn(true);
+        given(memberRepository.getReferenceById(anyLong())).willReturn(new Member(memberId));
+        given(postRepository.getReferenceById(anyLong())).willReturn(new Post(postId));
+
+        postService.choiceOption(authentication, postId, Option.A);
+
+        verify(choiceRepository).save(any(Choice.class));
+        verify(postRepository).plusACountById(postId);
+        verify(postRepository, never()).plusBCountById(postId);
     }
 
     Authentication setAuthentication() {
