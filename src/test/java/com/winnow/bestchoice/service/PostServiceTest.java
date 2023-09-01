@@ -11,9 +11,11 @@ import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import com.winnow.bestchoice.model.response.PostDetailRes;
+import com.winnow.bestchoice.model.response.PostRes;
 import com.winnow.bestchoice.repository.*;
 import com.winnow.bestchoice.type.MyPageSort;
 import com.winnow.bestchoice.type.Option;
+import com.winnow.bestchoice.type.PostSort;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -23,11 +25,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.security.core.Authentication;
 
 import java.time.Duration;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,8 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class PostServiceTest {
@@ -50,12 +53,12 @@ class PostServiceTest {
     @Mock TokenProvider tokenProvider;
     Authentication authentication = setAuthentication();
 
+    long memberId = 1L;
+    long postId = 1L;
+
     @Test
     @DisplayName("게시글 좋아요 성공")
     void likePostSuccess() {
-        long memberId = 1L;
-        long postId = 1L;
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(memberRepository.existsById(any())).willReturn(true);
         given(postRepository.existsById(any())).willReturn(true);
@@ -70,9 +73,6 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 좋아요 실패 - 이미 좋아요한 게시글")
     void likePostFail() {
-        long memberId = 1L;
-        long postId = 1L;
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(memberRepository.existsById(any())).willReturn(true);
         given(postRepository.existsById(any())).willReturn(true);
@@ -87,10 +87,7 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 좋아요 취소 성공")
     void unlikePostSuccess() {
-        long memberId = 1L;
-        long postId = 1L;
         PostLike postLike = new PostLike();
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(postLikeRepository.findByPost_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.of(postLike));
 
@@ -103,9 +100,6 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 좋아요 취소 실패 - 좋아요 누르지 않은 게시글에 취소 시도")
     void unlikePostFail() {
-        long memberId = 1L;
-        long postId = 1L;
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(postLikeRepository.findByPost_IdAndMember_Id(anyLong(), anyLong())).willReturn(Optional.empty());
 
@@ -118,9 +112,6 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 옵션(A or B) 선택 성공")
     void choiceOptionSuccess() {
-        long memberId = 1L;
-        long postId = 1L;
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(memberRepository.existsById(any())).willReturn(true);
         given(postRepository.existsById(any())).willReturn(true);
@@ -138,9 +129,6 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 옵션(A or B) 선택 실패 - 이미 옵션 선택한 게시글")
     void choiceOptionFail() {
-        long memberId = 1L;
-        long postId = 1L;
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(memberRepository.existsById(any())).willReturn(true);
         given(postRepository.existsById(any())).willReturn(true);
@@ -157,11 +145,8 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 상세 조회 성공")
     void getPostDetailSuccess() {
-        long memberId = 1L;
-        long postId = 1L;
         PostDetailDto postDetailDto = new PostDetailDto();
         postDetailDto.setId(postId);
-
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(postQueryRepository.getPostDetail(anyLong(), anyLong())).willReturn(Optional.of(postDetailDto));
 
@@ -173,8 +158,6 @@ class PostServiceTest {
     @Test
     @DisplayName("게시글 상세 조회 실패 - 존재하지 않는 게시글")
     void getPostDetailFail() {
-        long memberId = 1L;
-        long postId = 1L;
         PostDetailDto postDetailDto = new PostDetailDto();
         postDetailDto.setId(postId);
 
@@ -188,9 +171,8 @@ class PostServiceTest {
     }
 
     @Test
-    @DisplayName("myPage 게시글 타입별 조회")
+    @DisplayName("myPage 게시글 타입별 조회 성공")
     void getMyPageSuccess() {
-        long memberId = 1L;
         SliceImpl<PostSummaryDto> slice = new SliceImpl<>(Collections.emptyList());
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
         given(postQueryRepository.getSliceFromChoices(any(), anyLong())).willReturn(slice);
@@ -201,7 +183,19 @@ class PostServiceTest {
         verify(postQueryRepository, never()).getSliceFromComments(any(), anyLong());
         verify(postQueryRepository, never()).getSliceFromLikes(any(), anyLong());
         verify(postQueryRepository, never()).getSliceByMemberId(any(), anyLong());
+    }
 
+    @Test
+    @DisplayName("게시글 타입별 조회 성공")
+    void getPosts() {
+        PostSort sort = PostSort.LIKES;
+        SliceImpl<PostSummaryDto> dtos = new SliceImpl<>(List.of(new PostSummaryDto()));
+        given(postQueryRepository.getSlice(any(), any())).willReturn(dtos);
+
+        Slice<PostRes> slice = postService.getPosts(0, 10, sort);
+
+        assertEquals(slice.getContent().size(), 1);
+        verify(postQueryRepository).getSlice(any(), eq(sort.getType()));
     }
 
     Authentication setAuthentication() {
