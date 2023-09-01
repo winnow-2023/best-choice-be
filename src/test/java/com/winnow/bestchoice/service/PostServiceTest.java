@@ -2,14 +2,12 @@ package com.winnow.bestchoice.service;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.config.properties.JwtProperties;
-import com.winnow.bestchoice.entity.Choice;
-import com.winnow.bestchoice.entity.Member;
-import com.winnow.bestchoice.entity.Post;
-import com.winnow.bestchoice.entity.PostLike;
+import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
+import com.winnow.bestchoice.model.request.CreatePostForm;
 import com.winnow.bestchoice.model.response.PostDetailRes;
 import com.winnow.bestchoice.model.response.PostRes;
 import com.winnow.bestchoice.repository.*;
@@ -49,12 +47,38 @@ class PostServiceTest {
     @Mock PostRepository postRepository;
     @Mock PostQueryRepository postQueryRepository;
     @Mock PostLikeRepository postLikeRepository;
+    @Mock PostTagRepository postTagRepository;
     @Mock ChoiceRepository choiceRepository;
+    @Mock TagRepository tagRepository;
     @Mock TokenProvider tokenProvider;
     Authentication authentication = setAuthentication();
 
     long memberId = 1L;
     long postId = 1L;
+
+    @Test
+    @DisplayName("게시글 작성 성공")
+    void createPostSuccess() {
+        CreatePostForm form = CreatePostForm.builder()
+                .title("제목").content("내용").optionA("한다")
+                .optionB("안한다").tags(List.of("공부", "운동")).build();
+        Member member = new Member(memberId);
+        Post post = form.toEntity(member);
+        post.setId(postId);
+        given(tokenProvider.getMemberId(any())).willReturn(memberId);
+        given(memberRepository.findById(anyLong())).willReturn(Optional.of(member));
+        given(tagRepository.findByName(anyString())).willReturn(Optional.of(new Tag()));
+        given(postTagRepository.saveAll(any())).willReturn(null);
+        given(postRepository.save(any(Post.class))).willReturn(post);
+
+        PostDetailRes postDetailRes = postService.createPost(form, Collections.emptyList(), authentication);
+
+        verify(postRepository).save(any(Post.class));
+        verify(tagRepository, times(form.getTags().size())).findByName(anyString());
+        verify(tagRepository, never()).save(any(Tag.class));
+        assertEquals(postDetailRes.getPostId(), postId);
+        assertEquals(postDetailRes.getMember().getMemberId(), memberId);
+    }
 
     @Test
     @DisplayName("게시글 좋아요 성공")

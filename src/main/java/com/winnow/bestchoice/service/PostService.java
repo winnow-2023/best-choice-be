@@ -42,16 +42,15 @@ public class PostService {
 
 
     public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) { // 최적화 - tag 한 번에?
-        if (files.size() > 5) { //첨부파일 5개 초과하는 경우
+        if (files.size() > 5) { //첨부파일 5개 초과하는 경우 -> validation controller에서 인자로 받을 때 처리로 변경
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
         long memberId = tokenProvider.getMemberId(authentication);
 
         Member member = memberRepository.findById(memberId).
-                orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+                orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));// 쿼리 최적화
 
-        Post post = createPostForm.toEntity(member);
-        postRepository.save(post);
+        Post post = postRepository.save(createPostForm.toEntity(member));
 
         List<String> tags = createPostForm.getTags();
         List<PostTag> postTags = new ArrayList<>();
