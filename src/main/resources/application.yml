@@ -49,7 +49,7 @@ spring:
             clientSecret: ${KAKAO_CLIENT_SECRET}
             clientAuthenticationMethod: post
             authorizationGrantType: authorization_code
-            redirectUri: http://www.winnow-bestchoice.com:8080/code/kakao
+            redirectUri: http://www.winnow-bestchoice.com:8080/oauth2/code/kakao
             scope:
               - profile_nickname
               - account_email
