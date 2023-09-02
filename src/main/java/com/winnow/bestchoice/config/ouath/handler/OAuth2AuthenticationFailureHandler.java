@@ -1,6 +1,6 @@
 package com.winnow.bestchoice.config.ouath.handler;
 
-import com.winnow.bestchoice.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.winnow.bestchoice.config.ouath.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
@@ -17,7 +17,7 @@ import java.io.IOException;
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
-    private final static String REDIRECT_PATH = "http://www.winnow-bestchoice.com:8080/error";
+    private final static String REDIRECT_PATH = "http://localhost:5173";
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
