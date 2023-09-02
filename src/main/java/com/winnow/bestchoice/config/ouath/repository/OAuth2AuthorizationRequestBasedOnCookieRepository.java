@@ -1,4 +1,4 @@
-package com.winnow.bestchoice.repository;
+package com.winnow.bestchoice.config.ouath.repository;
 
 import com.winnow.bestchoice.util.CookieUtil;
 import lombok.Getter;

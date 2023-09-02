@@ -8,7 +8,7 @@ import com.winnow.bestchoice.config.ouath.handler.OAuth2AuthenticationSuccessHan
 import com.winnow.bestchoice.config.ouath.handler.TokenAccessDeniedHandler;
 import com.winnow.bestchoice.config.properties.CorsProperties;
 import com.winnow.bestchoice.repository.MemberRepository;
-import com.winnow.bestchoice.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
+import com.winnow.bestchoice.config.ouath.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import com.winnow.bestchoice.repository.RefreshTokenRepository;
 import com.winnow.bestchoice.service.CustomUserDetailService;
 import com.winnow.bestchoice.service.OAuth2UserCustomService;
@@ -71,18 +71,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                    .antMatchers("/login").permitAll()
+                    .antMatchers("/login/**").permitAll()
                     .antMatchers("/api/**").authenticated()
                     .anyRequest().permitAll()
                 .and()
                     .oauth2Login()
-                    .loginPage("/login")
                     .authorizationEndpoint()
-                    .baseUri("/oauth2/authorization")
+                    .baseUri("/oauth2/authorization/")
                     .authorizationRequestRepository(oAuth2AuthorizationRequestBasedOnCookieRepository())
                 .and()
                     .redirectionEndpoint()
-                    .baseUri("/oauth2/code/*")
+                    .baseUri("/oauth2/code/")
                 .and()
                     .userInfoEndpoint()
                     .userService(oAuth2UserCustomService)
