@@ -6,7 +6,6 @@ import com.winnow.bestchoice.config.ouath.exception.RestAuthenticationEntryPoint
 import com.winnow.bestchoice.config.ouath.handler.OAuth2AuthenticationFailureHandler;
 import com.winnow.bestchoice.config.ouath.handler.OAuth2AuthenticationSuccessHandler;
 import com.winnow.bestchoice.config.ouath.handler.TokenAccessDeniedHandler;
-import com.winnow.bestchoice.config.properties.CorsProperties;
 import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.config.ouath.repository.OAuth2AuthorizationRequestBasedOnCookieRepository;
 import com.winnow.bestchoice.repository.RefreshTokenRepository;
@@ -26,8 +25,10 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.CorsUtils;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 
@@ -38,7 +39,6 @@ import java.util.Arrays;
 @Setter
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final CorsProperties corsProperties;
     private final TokenProvider tokenProvider;
     private final CustomUserDetailService customUserDetailService;
     private final OAuth2UserCustomService oAuth2UserCustomService;
@@ -150,18 +150,31 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
      * Cors 설정
      * */
     @Bean
-    public UrlBasedCorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource corsConfigSource = new UrlBasedCorsConfigurationSource();
-
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-        corsConfig.setAllowedHeaders(Arrays.asList(corsProperties.getAllowedHeaders().split(",")));
-        corsConfig.setAllowedMethods(Arrays.asList(corsProperties.getAllowedMethods().split(",")));
-        corsConfig.setAllowedOrigins(Arrays.asList(corsProperties.getAllowedOrigins().split(",")));
-        corsConfig.setAllowCredentials(true);
-        corsConfig.setMaxAge(corsConfig.getMaxAge());
 
-        corsConfigSource.registerCorsConfiguration("/**", corsConfig);
-        return corsConfigSource;
+       corsConfig.setAllowCredentials(true);
+       corsConfig.setAllowedOrigins(Arrays.asList(
+               "http://127.0.0.1:8080",
+               "http://127.0.0.1:3000",
+               "http://127.0.0.1:5173",
+               "https://best-choice-steel.vercel.app"
+       ));
+       corsConfig.setAllowedMethods(Arrays.asList(
+               HttpMethod.GET.name(),
+               HttpMethod.POST.name(),
+               HttpMethod.DELETE.name(),
+               HttpMethod.PUT.name(),
+               HttpMethod.HEAD.name(),
+               HttpMethod.OPTIONS.name(),
+               HttpMethod.PATCH.name()
+       ));
+       corsConfig.setAllowedHeaders(Arrays.asList("*"));
+       corsConfig.setExposedHeaders(Arrays.asList("*"));
+
+       UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+       source.registerCorsConfiguration("/**", corsConfig);
+       return source;
     }
 
 }
