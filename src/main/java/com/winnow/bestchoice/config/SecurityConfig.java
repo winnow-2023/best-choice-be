@@ -71,7 +71,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                    .antMatchers("/login/**").permitAll()
+                    .antMatchers("/**").permitAll()
                     .antMatchers("/api/**").authenticated()
                     .anyRequest().permitAll()
                 .and()
@@ -169,7 +169,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                HttpMethod.OPTIONS.name(),
                HttpMethod.PATCH.name()
        ));
-       corsConfig.setAllowedHeaders(Arrays.asList("http://127.0.0.1:5173"));
+       corsConfig.setAllowedHeaders(Arrays.asList("*"));
        corsConfig.setExposedHeaders(Arrays.asList("*"));
 
        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
