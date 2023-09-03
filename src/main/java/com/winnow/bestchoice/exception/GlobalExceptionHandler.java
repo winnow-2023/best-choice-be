@@ -10,6 +10,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import javax.validation.ConstraintViolationException;
 
@@ -63,10 +64,17 @@ public class GlobalExceptionHandler {
             new ErrorResponse(INVALID_REQUEST, INVALID_REQUEST.getDescription()));
   }
 
+  @ExceptionHandler(MissingServletRequestPartException.class)
+  public ResponseEntity<?> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
+    log.info("MissingServletRequestPartException is occurred");
+    return ResponseEntity.badRequest().body(
+            new ErrorResponse(INVALID_REQUEST, INVALID_REQUEST.getDescription()));
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<?> handleException(Exception e) {
     log.error("Exception is occurred.", e);
-    return ResponseEntity.badRequest().body(
+    return ResponseEntity.internalServerError().body(
         new ErrorResponse(SERVER_ERROR, SERVER_ERROR.getDescription()));
   }
 
