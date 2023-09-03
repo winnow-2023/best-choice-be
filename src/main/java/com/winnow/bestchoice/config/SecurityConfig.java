@@ -169,7 +169,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                HttpMethod.OPTIONS.name(),
                HttpMethod.PATCH.name()
        ));
-       corsConfig.setAllowedHeaders(Arrays.asList("*"));
+       corsConfig.setAllowedHeaders(Arrays.asList("http://127.0.0.1:5173"));
        corsConfig.setExposedHeaders(Arrays.asList("*"));
 
        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
