@@ -34,7 +34,7 @@ public class PostController {
 
     @PostMapping
     public ResponseEntity<?> createPost(Authentication authentication,
-                                        @Valid CreatePostForm createPostForm,
+                                        @RequestBody @Valid CreatePostForm createPostForm,
                                         @Size(max = 5) List<MultipartFile> files) {
 
         PostDetailRes postDetail = postService.createPost(createPostForm, files, authentication);
