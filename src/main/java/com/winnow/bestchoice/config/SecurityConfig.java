@@ -156,23 +156,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         CorsConfiguration corsConfig = new CorsConfiguration();
 
        corsConfig.setAllowCredentials(true);
-       corsConfig.setAllowedOrigins(Arrays.asList(
-               "http://127.0.0.1:8080",
-               "http://127.0.0.1:3000",
-               "http://127.0.0.1:5173",
-               "https://best-choice-steel.vercel.app"
-       ));
-       corsConfig.setAllowedMethods(Arrays.asList(
-               HttpMethod.GET.name(),
-               HttpMethod.POST.name(),
-               HttpMethod.DELETE.name(),
-               HttpMethod.PUT.name(),
-               HttpMethod.HEAD.name(),
-               HttpMethod.OPTIONS.name(),
-               HttpMethod.PATCH.name()
-       ));
-       corsConfig.setAllowedHeaders(Arrays.asList("*"));
-       corsConfig.setExposedHeaders(Arrays.asList("*"));
+       corsConfig.addAllowedOrigin("*");
+       corsConfig.addAllowedHeader("*");
+       corsConfig.addAllowedMethod("*");
 
        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
        source.registerCorsConfiguration("/**", corsConfig);
