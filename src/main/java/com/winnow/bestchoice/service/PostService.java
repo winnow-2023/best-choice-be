@@ -169,10 +169,9 @@ public class PostService {
 
     public void deletePost(Authentication authentication, long postId) {
         long memberId = tokenProvider.getMemberId(authentication);
-        if (!postRepository.existsByMember_IdAndDeletedFalse(memberId)) {
+        if (!postQueryRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-
-        postQueryRepository.deletePost(memberId, postId);
+        postQueryRepository.deletePost(postId);
     }
 }
