@@ -29,9 +29,9 @@ public class Choice {
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @Column(nullable = false, name = "option")
+    @Column(nullable = false, name = "choices")
     @Enumerated(EnumType.STRING)
-    private Option option;
+    private Option choices;
 
     @CreatedDate
     @Column(nullable = false, name = "created_date")
