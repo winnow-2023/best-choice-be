@@ -146,7 +146,7 @@ public class PostService {
     }
 
     public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+        long memberId = tokenProvider.getMemberId(authentication);
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<PostSummaryDto> postSlice;
 
@@ -165,5 +165,14 @@ public class PostService {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         return postQueryRepository.getSliceByTag(pageRequest, tag).map(PostRes::of);
+    }
+
+    public void deletePost(Authentication authentication, long postId) {
+        long memberId = tokenProvider.getMemberId(authentication);
+        if (!postRepository.existsByMember_IdAndDeletedFalse(memberId)) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        postQueryRepository.deletePost(memberId, postId);
     }
 }
