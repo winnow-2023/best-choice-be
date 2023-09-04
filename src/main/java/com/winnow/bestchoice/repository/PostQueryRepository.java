@@ -45,7 +45,7 @@ public class PostQueryRepository {
     public Optional<PostDetailDto> getPostDetail(long postId, long memberId) {
         return Optional.ofNullable(jpaQueryFactory.select(Projections.bean(PostDetailDto.class,
                         post.id, member.id.as("memberId"), member.nickname
-                        , choice.option.as("myChoice"), postLike.isNotNull().as("liked")
+                        , choice.choices.as("myChoice"), postLike.isNotNull().as("liked")
                         , post.title, post.content, post.optionA, post.optionB, post.tags
                         , post.createdDate, post.popularityDate, post.likeCount
                         , post.ACount, post.BCount, post.commentCount))

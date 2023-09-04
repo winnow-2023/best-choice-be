@@ -121,7 +121,7 @@ public class PostService {
         choiceRepository.save(Choice.builder()
                 .member(member)
                 .post(post)
-                .option(choice).build());
+                .choices(choice).build());
 
         switch (choice) {
             case A : postRepository.plusACountById(postId); break;
