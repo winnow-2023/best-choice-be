@@ -117,11 +117,17 @@ public class PostQueryRepository {
         return getSlice(pageable, content);
     }
 
-    public void deletePost(long memberId, long postId) {
+    public void deletePost(long postId) {
         jpaQueryFactory.update(post)
                 .set(post.deleted, true)
-                .where(post.member.id.eq(memberId))
+                .where(post.id.eq(postId))
                 .execute();
+    }
+
+    public boolean existsByPostIdAndMemberId(long postId, long memberId) {
+        return jpaQueryFactory.select(post.id).from(post)
+                .where(post.id.eq(postId), post.member.id.eq(memberId), post.deleted.eq(false))
+                .fetchFirst() != null;
     }
 
     private SliceImpl<PostSummaryDto> getSlice(Pageable pageable, List<PostSummaryDto> content) {
@@ -140,6 +146,7 @@ public class PostQueryRepository {
                         , post.title, post.optionA, post.optionB, post.tags
                         , post.createdDate, post.popularityDate, post.likeCount
                         , post.ACount, post.BCount, post.commentCount))
-                .from(post).join(post.member, member);
+                .from(post).join(post.member, member)
+                .where(post.deleted.eq(false));
     }
 }
