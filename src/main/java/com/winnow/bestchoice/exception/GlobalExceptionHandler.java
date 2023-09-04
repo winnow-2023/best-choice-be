@@ -66,7 +66,7 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MissingServletRequestPartException.class)
   public ResponseEntity<?> handleMissingServletRequestPartException(MissingServletRequestPartException e) {
-    log.info("MissingServletRequestPartException is occurred");
+    log.info("MissingServletRequestPartException is occurred", e);
     return ResponseEntity.badRequest().body(
             new ErrorResponse(INVALID_REQUEST, INVALID_REQUEST.getDescription()));
   }
