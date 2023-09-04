@@ -5,6 +5,7 @@ import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.model.response.MemberDetailRes;
 import com.winnow.bestchoice.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
@@ -60,5 +61,13 @@ public class MemberService {
     // 닉네임 중복 체크 메서드
     public boolean validNickname(String nickname) {
         return memberRepository.findByNickname(nickname).isPresent();
+    }
+
+    public MemberDetailRes getMemberDetail(Authentication authentication) {
+        Long memberId = tokenProvider.getMemberId(authentication);
+        Member member = memberRepository.findById(memberId).orElseThrow(
+                () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+
+        return MemberDetailRes.of(member);
     }
 }
