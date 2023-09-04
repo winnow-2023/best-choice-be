@@ -18,6 +18,10 @@ spring:
       hibernate.format_sql: true
       dialect: org.hibernate.dialect.MySQL8InnoDBDialect
 
+  redis:
+    host: 3.39.67.113
+    port: 6379
+
 #API KEYS
   profiles:
     include: API-KEY
