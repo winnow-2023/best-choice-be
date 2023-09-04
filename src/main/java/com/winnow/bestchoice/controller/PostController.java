@@ -58,6 +58,13 @@ public class PostController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/api/posts/{postId}")
+    public ResponseEntity<?> deletePost(Authentication authentication, @PathVariable long postId) {
+
+        postService.deletePost(authentication, postId);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/posts/{postId}")
     public ResponseEntity<?> getPostDetail(Authentication authentication, @PathVariable long postId) {
         return ResponseEntity.ok(postService.getPostDetail(authentication, postId));

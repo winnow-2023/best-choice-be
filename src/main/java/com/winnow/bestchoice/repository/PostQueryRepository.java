@@ -53,6 +53,7 @@ public class PostQueryRepository {
                 .leftJoin(choice).on(choice.post.eq(post), choice.member.id.eq(memberId))
                 .leftJoin(postLike).on(postLike.post.eq(post), postLike.member.id.eq(memberId))
                 .where(post.id.eq(postId))
+                .where(post.deleted.eq(false))
                 .fetchOne());
     }
 
@@ -114,6 +115,13 @@ public class PostQueryRepository {
                 .fetch();
 
         return getSlice(pageable, content);
+    }
+
+    public void deletePost(long memberId, long postId) {
+        jpaQueryFactory.update(post)
+                .set(post.deleted, true)
+                .where(post.member.id.eq(memberId))
+                .execute();
     }
 
     private SliceImpl<PostSummaryDto> getSlice(Pageable pageable, List<PostSummaryDto> content) {
