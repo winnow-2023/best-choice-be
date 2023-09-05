@@ -1,5 +1,7 @@
 package com.winnow.bestchoice.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
@@ -14,6 +16,8 @@ import com.winnow.bestchoice.type.MyPageSort;
 import com.winnow.bestchoice.type.Option;
 import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
@@ -25,8 +29,10 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class PostService {
@@ -38,7 +44,10 @@ public class PostService {
     private final PostTagRepository postTagRepository;
     private final PostLikeRepository postLikeRepository;
     private final ChoiceRepository choiceRepository;
+    private final AmazonS3Client amazonS3Client;
     private final TokenProvider tokenProvider;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
 
     public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) { // 최적화 - tag 한 번에?
@@ -62,6 +71,21 @@ public class PostService {
 
         //TODO S3 저장 로직 구현
         ArrayList<String> resources = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(files)) {
+            try {
+                for (MultipartFile file : files) {
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentType(file.getContentType());
+                    metadata.setContentLength(file.getSize());
+                    String fileName = UUID.randomUUID().toString();
+                    amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
+                    resources.add(amazonS3Client.getResourceUrl(bucket, fileName));
+                }
+            } catch (Exception e) {
+                log.info("exception is occurred when S3 upload in createPost");
+                throw new CustomException(ErrorCode.SERVER_ERROR);
+            }
+        }
 
         PostDetailRes postDetail = PostDetailRes.of(post);
         postDetail.setResources(resources);

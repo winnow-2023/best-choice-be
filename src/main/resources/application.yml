@@ -24,7 +24,9 @@ spring:
 
 #API KEYS
   profiles:
-    include: API-KEY
+    include:
+    - API-KEY
+    - S3
 
   security:
     oauth2:
@@ -70,6 +72,11 @@ spring:
             tokenUri: https://kauth.kakao.com/oauth/token
             userInfoUri: https://kapi.kakao.com/v2/user/me
             userNameAttribute: id
+
+  #Multipart
+  servlet:
+    multipart:
+      max-request-size: 100MB
 
 
 # jwt issuer, secret key 설정
