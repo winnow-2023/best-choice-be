@@ -4,18 +4,14 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.winnow.bestchoice.entity.QPostTag;
-import com.winnow.bestchoice.entity.QTag;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
