@@ -28,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -172,11 +173,15 @@ public class PostService {
     }
 
     public PostDetailRes getPostDetail(Authentication authentication, long postId) {
-        long memberId = 0;
-        if (!ObjectUtils.isEmpty(authentication)) {
-            memberId = tokenProvider.getMemberId(authentication);
+        Optional<PostDetailDto> postDetailDtoOptional;
+        if (ObjectUtils.isEmpty(authentication)) { //비로그인 사용자
+            postDetailDtoOptional = postQueryRepository.getPostDetail(postId);
+        } else { //로그인한 사용자
+            long memberId = tokenProvider.getMemberId(authentication);
+            postDetailDtoOptional = postQueryRepository.getPostDetailWithLoginMember(postId, memberId);
         }
-        PostDetailDto postDetailDto = postQueryRepository.getPostDetail(postId, memberId)
+
+        PostDetailDto postDetailDto = postDetailDtoOptional
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
         return PostDetailRes.of(postDetailDto, attachmentRepository.findUrlsByPostId(postId));

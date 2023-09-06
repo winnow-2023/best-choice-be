@@ -22,6 +22,7 @@ public class PostDetailRes {
     private String optionB;
     private Option myChoice;
     private boolean liked;
+    private boolean reported;
     private List<String> tags;
     private List<String> resources;
     private LocalDateTime createdDate;
@@ -62,6 +63,7 @@ public class PostDetailRes {
                 .optionB(dto.getOptionB())
                 .myChoice(dto.getMyChoice())
                 .liked(dto.isLiked())
+                .reported(dto.isReported())
                 .tags(dto.getTags())
                 .resources(resources)
                 .ACount(dto.getACount())
