@@ -92,7 +92,7 @@ public class CommentService {
         commentRepository.minusLikeCountById(commentId);
     }
 
-    public void deleteComment(Authentication authentication, long commentId) { //comment에 삭제일만 넣어줌 - 추후 변경
+    public void deleteComment(Authentication authentication, long commentId) {
         long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
@@ -107,6 +107,7 @@ public class CommentService {
         }
 
         comment.setDeletedDate(LocalDateTime.now());
+        postRepository.minusCommentCountById(commentId);
     }
 
     public Page<CommentRes> getComments(long postId, int page, int size, CommentSort sort) {
