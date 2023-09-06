@@ -172,7 +172,7 @@ class PostServiceTest {
         PostDetailDto postDetailDto = new PostDetailDto();
         postDetailDto.setId(postId);
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
-        given(postQueryRepository.getPostDetail(anyLong(), anyLong())).willReturn(Optional.of(postDetailDto));
+        given(postQueryRepository.getPostDetailWithLoginMember(anyLong(), anyLong())).willReturn(Optional.of(postDetailDto));
 
         PostDetailRes postDetail = postService.getPostDetail(authentication, postId);
 
@@ -186,7 +186,7 @@ class PostServiceTest {
         postDetailDto.setId(postId);
 
         given(tokenProvider.getMemberId(any())).willReturn(memberId);
-        given(postQueryRepository.getPostDetail(anyLong(), anyLong())).willReturn(Optional.empty());
+        given(postQueryRepository.getPostDetailWithLoginMember(anyLong(), anyLong())).willReturn(Optional.empty());
 
         CustomException e = assertThrows(CustomException.class,
                 () -> postService.getPostDetail(authentication, postId));

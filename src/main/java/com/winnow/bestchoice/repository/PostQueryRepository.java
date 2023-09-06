@@ -4,6 +4,7 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import com.winnow.bestchoice.entity.QReport;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +22,7 @@ import static com.winnow.bestchoice.entity.QMember.member;
 import static com.winnow.bestchoice.entity.QPost.post;
 import static com.winnow.bestchoice.entity.QPostLike.postLike;
 import static com.winnow.bestchoice.entity.QPostTag.postTag;
+import static com.winnow.bestchoice.entity.QReport.report;
 import static com.winnow.bestchoice.entity.QTag.tag;
 
 @Repository
@@ -38,16 +40,29 @@ public class PostQueryRepository {
         return getSlice(pageable, content);
     }
 
-    public Optional<PostDetailDto> getPostDetail(long postId, long memberId) {
+    public Optional<PostDetailDto> getPostDetail(long postId) {
         return Optional.ofNullable(jpaQueryFactory.select(Projections.bean(PostDetailDto.class,
                         post.id, member.id.as("memberId"), member.nickname
-                        , choice.choices.as("myChoice"), postLike.isNotNull().as("liked")
                         , post.title, post.content, post.optionA, post.optionB, post.tags
-                        , post.createdDate, post.popularityDate, post.likeCount
-                        , post.ACount, post.BCount, post.commentCount))
+                        , post.createdDate, post.popularityDate
+                        , post.likeCount, post.ACount, post.BCount, post.commentCount))
+                .from(post).join(post.member, member)
+                .where(post.id.eq(postId))
+                .where(post.deleted.eq(false))
+                .fetchOne());
+    }
+
+    public Optional<PostDetailDto> getPostDetailWithLoginMember(long postId, long memberId) {
+        return Optional.ofNullable(jpaQueryFactory.select(Projections.bean(PostDetailDto.class,
+                        post.id, member.id.as("memberId"), member.nickname
+                        , choice.choices.as("myChoice"), postLike.isNotNull().as("liked"), report.isNotNull().as("reported")
+                        , post.title, post.content, post.optionA, post.optionB, post.tags
+                        , post.createdDate, post.popularityDate
+                        , post.likeCount, post.ACount, post.BCount, post.commentCount))
                 .from(post).join(post.member, member)
                 .leftJoin(choice).on(choice.post.eq(post), choice.member.id.eq(memberId))
                 .leftJoin(postLike).on(postLike.post.eq(post), postLike.member.id.eq(memberId))
+                .leftJoin(report).on(report.post.eq(post), report.member.id.eq(memberId))
                 .where(post.id.eq(postId))
                 .where(post.deleted.eq(false))
                 .fetchOne());
