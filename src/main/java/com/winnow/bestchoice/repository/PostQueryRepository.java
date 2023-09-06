@@ -92,11 +92,11 @@ public class PostQueryRepository {
         return getSlice(pageable, content);
     }
 
-    public Slice<PostSummaryDto> getSliceFromComments(Pageable pageable, long memberId) {// distinct 필요 (중복 조회)
-        List<PostSummaryDto> content = getPostSummaryDtosQuery()
+    public Slice<PostSummaryDto> getSliceFromComments(Pageable pageable, long memberId) {// todo 댓글의 생성일로 정렬하도록 변경
+        List<PostSummaryDto> content = getPostSummaryDtosQuery().distinct()
                 .join(comment).on(comment.post.eq(post))
                 .where(comment.member.id.eq(memberId))
-                .orderBy(comment.createdDate.desc())
+                .orderBy(post.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();
