@@ -27,5 +27,5 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("update Post p set p.commentCount=p.commentCount+1 where p.id=:id")
     void plusCommentCountById(long id);
 
-    boolean existsByMember_IdAndDeletedFalse(long member_Id);
+    boolean existsByIdAndDeletedFalse(long postId);
 }

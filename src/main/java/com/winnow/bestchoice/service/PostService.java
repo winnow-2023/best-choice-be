@@ -45,10 +45,15 @@ public class PostService {
     private final PostLikeRepository postLikeRepository;
     private final ChoiceRepository choiceRepository;
     private final AttachmentRepository attachmentRepository;
+    private final ReportRepository reportRepository;
     private final AmazonS3Client amazonS3Client;
     private final TokenProvider tokenProvider;
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
+    @Value("${point.popularity}")
+    private int popularityPoint;
+    @Value("${point.report}")
+    private int reportPoint;
 
 
     public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) { // 최적화 - tag 한 번에?
@@ -93,7 +98,7 @@ public class PostService {
     }
 
     public void likePost(Authentication authentication, long postId) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+        long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -110,7 +115,7 @@ public class PostService {
     }
 
     public void unlikePost(Authentication authentication, long postId) { //최적화
-        Long memberId = tokenProvider.getMemberId(authentication);
+        long memberId = tokenProvider.getMemberId(authentication);
 
         PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
@@ -120,7 +125,7 @@ public class PostService {
     }
 
     public void choiceOption(Authentication authentication, long postId, Option choice) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+        long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -145,6 +150,24 @@ public class PostService {
             case A : postRepository.plusACountById(postId); break;
             case B : postRepository.plusBCountById(postId); break;
             default: throw new IllegalStateException("Unexpected value: " + choice);
+        }
+    }
+
+    public void reportPost(Authentication authentication, long postId) {
+        long memberId = tokenProvider.getMemberId(authentication);
+        if (!postRepository.existsByIdAndDeletedFalse(postId)) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+        Member member = memberRepository.getReferenceById(memberId);
+        Post post = postRepository.getReferenceById(postId);
+
+        if (reportRepository.existsByPostAndMember(post, member)) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        reportRepository.save(new Report(member, post));
+        if (reportRepository.countByPost(post) >= reportPoint) {
+            postQueryRepository.deletePost(postId);
         }
     }
 
@@ -177,7 +200,6 @@ public class PostService {
             case COMMENTS : postSlice = postQueryRepository.getSliceFromComments(pageRequest, memberId); break;
             default: throw new IllegalStateException("Unexpected value: " + sort);
         }
-
         return postSlice.map(PostRes::of);
     }
 
