@@ -30,7 +30,7 @@ import static com.winnow.bestchoice.entity.QTag.tag;
 public class PostQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {//popularityDate null 제외 조회 처리
+    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {// todo popularityDate null 제외 조회 처리
         List<PostSummaryDto> content = getPostSummaryDtosQuery()
                 .orderBy(type)
                 .offset(pageable.getOffset())

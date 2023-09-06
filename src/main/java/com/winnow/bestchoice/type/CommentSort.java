@@ -11,7 +11,7 @@ import static com.winnow.bestchoice.entity.QComment.comment;
 @AllArgsConstructor
 @RequiredArgsConstructor
 public enum CommentSort {
-    LATEST("createdDate", comment.createdDate.desc()),
+    LATEST("createdDate", comment.createdDate.asc()),
     LIKES("likeCount", comment.likeCount.desc());
 
     private String value;
