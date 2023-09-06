@@ -7,6 +7,7 @@ import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
+import com.winnow.bestchoice.model.dto.CommentDto;
 import com.winnow.bestchoice.model.request.CreateCommentForm;
 import com.winnow.bestchoice.model.response.CommentRes;
 import com.winnow.bestchoice.repository.*;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 
 import java.time.LocalDateTime;
 
@@ -110,9 +112,15 @@ public class CommentService {
         postRepository.minusCommentCountById(commentId);
     }
 
-    public Page<CommentRes> getComments(long postId, int page, int size, CommentSort sort) {
+    public Page<CommentRes> getComments(Authentication authentication, long postId,
+                                        int page, int size, CommentSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
-
-        return commentQueryRepository.getPageByPostId(pageRequest, sort.getType(), postId).map(CommentRes::of);
+        if (ObjectUtils.isEmpty(authentication)) {// 비로그인 사용자
+            return commentQueryRepository.getPageByPostId(pageRequest, sort.getType(), postId).map(CommentRes::of);
+        } else { // 로그인한 사용자
+            long memberId = tokenProvider.getMemberId(authentication);
+            return commentQueryRepository.getPageByPostIdWithLoginMember(pageRequest, sort.getType(), postId, memberId)
+                    .map(CommentRes::of);
+        }
     }
 }
