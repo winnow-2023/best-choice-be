@@ -98,7 +98,7 @@ public class PostService {
         return PostDetailRes.of(post, resources);
     }
 
-    public void likePost(Authentication authentication, long postId) {
+    public void likePost(Authentication authentication, long postId) { //최적화
         long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {

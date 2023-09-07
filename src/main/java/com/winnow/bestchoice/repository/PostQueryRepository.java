@@ -30,7 +30,7 @@ import static com.winnow.bestchoice.entity.QTag.tag;
 public class PostQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {//popularityDate null 제외 조회 처리
+    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {// todo popularityDate null 제외 조회 처리
         List<PostSummaryDto> content = getPostSummaryDtosQuery()
                 .orderBy(type)
                 .offset(pageable.getOffset())
@@ -92,11 +92,11 @@ public class PostQueryRepository {
         return getSlice(pageable, content);
     }
 
-    public Slice<PostSummaryDto> getSliceFromComments(Pageable pageable, long memberId) {// distinct 필요 (중복 조회)
-        List<PostSummaryDto> content = getPostSummaryDtosQuery()
+    public Slice<PostSummaryDto> getSliceFromComments(Pageable pageable, long memberId) {// todo 댓글의 생성일로 정렬하도록 변경
+        List<PostSummaryDto> content = getPostSummaryDtosQuery().distinct()
                 .join(comment).on(comment.post.eq(post))
                 .where(comment.member.id.eq(memberId))
-                .orderBy(comment.createdDate.desc())
+                .orderBy(post.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
                 .fetch();

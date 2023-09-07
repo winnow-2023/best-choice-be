@@ -15,6 +15,7 @@ public class CommentDto {
     private Option option;
     private String content;
     private long likeCount;
+    private boolean liked;
     private LocalDateTime createdDate;
     private LocalDateTime deletedDate;
 }
