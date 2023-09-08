@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 
 @Getter @Setter
 public class CommentDto {
-
     private long id;
     private long memberId;
     private String nickname;

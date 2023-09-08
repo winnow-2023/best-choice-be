@@ -27,4 +27,5 @@ public class ChatRoom implements Serializable {
 
         return chatRoom;
     }
+
 }

@@ -65,7 +65,6 @@ public class ChatRoomRepository {
                 .collect(Collectors.toList());
 
         return chatRooms;
-
     }
 
     // 채팅방 생성

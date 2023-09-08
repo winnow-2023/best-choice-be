@@ -18,5 +18,4 @@ public class ChatMessage {
     private String sender;
     private String message;
     private long userCount;
-
 }

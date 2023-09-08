@@ -27,4 +27,5 @@ public class RedisSubscriber {
             log.error("Exception {}", e);
         }
     }
+
 }
