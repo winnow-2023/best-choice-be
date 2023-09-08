@@ -1,0 +1,9 @@
+cloud:
+  aws:
+    s3:
+      bucket: winnow-bestchoice
+    stack.auto: false
+    region.static: ap-northeast-2
+    credentials:
+      accessKey: AKIASTUR3KDHHHCY4JNG
+      secretKey: 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
