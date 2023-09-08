@@ -65,6 +65,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                     .csrf().disable()
+                    .headers().frameOptions().sameOrigin()
+                .and()
                     .formLogin().disable()
                     .httpBasic().disable()
                     .exceptionHandling()

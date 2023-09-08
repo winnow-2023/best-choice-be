@@ -51,6 +51,7 @@ public class TokenProvider {
                 .setExpiration(expiry)
                 .setSubject(member.getEmail())
                 .claim("id", member.getId())
+                .claim("nickname", member.getNickname())
                 .signWith(SignatureAlgorithm.HS256, jwtProperties.getSecretKey())
                 .compact();
     }
@@ -86,6 +87,12 @@ public class TokenProvider {
     private Long getMemberId(String token) {
         Claims claims = getClaims(token);
         return claims.get("id", Long.class);
+    }
+
+    // 토큰 기반으로 회원 닉네임을 가져오는 메서드
+    public String getNickname(String token) {
+        Claims claims = getClaims(token);
+        return claims.get("nickname", String.class);
     }
 
     private Claims getClaims(String token) {

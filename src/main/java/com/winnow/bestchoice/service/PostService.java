@@ -220,4 +220,10 @@ public class PostService {
         }
         postQueryRepository.deletePost(postId);
     }
+
+    public Post findByPostId(Long postId) {
+        return postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND)
+        );
+    }
 }
