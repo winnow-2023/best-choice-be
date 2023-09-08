@@ -24,7 +24,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-        registry.addEndpoint("/ws-stomp").setAllowedOrigins("*") // TODO: 나중에 cors 에러 발생한다면 이 부분 수정
+        registry.addEndpoint("/ws-stomp").setAllowedOrigins("ws://localhost:5173") // TODO: 나중에 cors 에러 발생한다면 이 부분 수정
                 .withSockJS();
     }
 
