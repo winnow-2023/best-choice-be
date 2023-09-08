@@ -20,7 +20,10 @@ public enum ErrorCode {
   OAUTH_PROVIDER_MISS_MATCH("Provider Type이 일치하지 않습니다.", BAD_REQUEST),
   ALREADY_REGISTERED_MEMBER("이미 가입된 회원입니다.", CONFLICT),
   INVALID_TOKEN("토큰이 유효하지 않습니다", UNAUTHORIZED),
-  ALREADY_REGISTERED_NICKNAME("이미 등록된 닉네임 입니다.", CONFLICT);
+  ALREADY_REGISTERED_NICKNAME("이미 등록된 닉네임 입니다.", CONFLICT),
+  POST_MEMBER_ID_MISS_MATCH("글을 작성한 회원만 채팅방을 생성할 수 있습니다.", UNAUTHORIZED),
+  ALREADY_DELETED_POST("이미 삭제된 게시글입니다.", NOT_FOUND),
+  CHATROOM_NOT_FOUND("해당 채팅방을 찾을 수 없습니다.", NOT_FOUND);
 
   private final String description;
   private final HttpStatus httpStatus;

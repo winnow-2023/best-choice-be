@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Transactional
@@ -173,5 +174,11 @@ public class PostService {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
         postQueryRepository.deletePost(postId);
+    }
+
+    public Post findByPostId(Long postId) {
+        return postRepository.findById(postId).orElseThrow(
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND)
+        );
     }
 }
