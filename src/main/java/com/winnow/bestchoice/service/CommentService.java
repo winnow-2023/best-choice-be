@@ -109,7 +109,7 @@ public class CommentService {
         }
 
         comment.setDeletedDate(LocalDateTime.now());
-        postRepository.minusCommentCountById(commentId);
+        postRepository.minusCommentCountById(comment.getPost().getId());
     }
 
     public Page<CommentRes> getComments(Authentication authentication, long postId,
