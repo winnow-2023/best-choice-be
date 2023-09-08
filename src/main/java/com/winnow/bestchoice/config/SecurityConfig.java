@@ -155,9 +155,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
-
        corsConfig.setAllowCredentials(true);
        corsConfig.addAllowedOrigin("http://localhost:5173");
+       corsConfig.addAllowedOrigin("ws://localhost:5173/ws-stomp");
+       corsConfig.addAllowedOrigin("ws://localhost:5173");
        corsConfig.addAllowedHeader("*");
        corsConfig.addAllowedMethod("*");
 
@@ -165,4 +166,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        source.registerCorsConfiguration("/**", corsConfig);
        return source;
     }
+
 }
