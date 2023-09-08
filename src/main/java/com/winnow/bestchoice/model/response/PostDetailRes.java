@@ -22,6 +22,7 @@ public class PostDetailRes {
     private String optionB;
     private Option myChoice;
     private boolean liked;
+    private boolean reported;
     private List<String> tags;
     private List<String> resources;
     private LocalDateTime createdDate;
@@ -33,7 +34,7 @@ public class PostDetailRes {
     private String liveChatUrl;
     private String liveChatUserCount;
 
-    public static PostDetailRes of(Post post) {
+    public static PostDetailRes of(Post post, List<String> resources) {
         return PostDetailRes.builder()
                 .postId(post.getId())
                 .member(MemberRes.of(post.getMember()))
@@ -42,6 +43,7 @@ public class PostDetailRes {
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
                 .tags(post.getTags())
+                .resources(resources)
                 .ACount(post.getACount())
                 .BCount(post.getBCount())
                 .likeCount(post.getLikeCount())
@@ -51,7 +53,7 @@ public class PostDetailRes {
                 .build();
     }
 
-    public static PostDetailRes of(PostDetailDto dto) {
+    public static PostDetailRes of(PostDetailDto dto, List<String> resources) {
         return PostDetailRes.builder()
                 .postId(dto.getId())
                 .member(new MemberRes(dto.getMemberId(), dto.getNickname()))
@@ -61,8 +63,9 @@ public class PostDetailRes {
                 .optionB(dto.getOptionB())
                 .myChoice(dto.getMyChoice())
                 .liked(dto.isLiked())
+                .reported(dto.isReported())
                 .tags(dto.getTags())
-                .resources(dto.getResources())
+                .resources(resources)
                 .ACount(dto.getACount())
                 .BCount(dto.getBCount())
                 .likeCount(dto.getLikeCount())

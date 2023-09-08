@@ -19,6 +19,7 @@ public class PostDetailDto {
     private String optionB;
     private Option myChoice;
     private boolean liked;
+    private boolean reported;
     private List<String> tags;
     private List<String> resources;
     private LocalDateTime createdDate;

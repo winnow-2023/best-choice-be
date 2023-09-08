@@ -42,9 +42,10 @@ public class CommentController {
     }
 
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<?> getComments(@PathVariable long postId, @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<?> getComments(Authentication authentication, @PathVariable long postId,
+                                         @RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size,
                                          @RequestParam(defaultValue = "LATEST") CommentSort sort) {
-        return ResponseEntity.ok(commentService.getComments(postId, page, size, sort));
+        return ResponseEntity.ok(commentService.getComments(authentication, postId, page, size, sort));
     }
 }

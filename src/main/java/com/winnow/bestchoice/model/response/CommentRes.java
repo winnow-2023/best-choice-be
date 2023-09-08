@@ -18,19 +18,9 @@ public class CommentRes {
     private String content;
     private long likeCount;
     private Option option;
+    private boolean liked;
     private LocalDateTime createdDate;
     private LocalDateTime deletedDate;
-
-//    public static CommentRes of(Comment comment) {
-//        return CommentRes.builder()
-//                .commentId(comment.getId())
-//                .member(MemberRes.of(comment.getMember()))
-//                .content(comment.getContent())
-//                .likeCount(comment.getLikeCount())
-//                .createdDate(comment.getCreatedDate())
-//                .deletedDate(comment.getDeletedDate())
-//                .build();
-//    }
 
     public static CommentRes of(CommentDto dto) {
         return CommentRes.builder()
@@ -39,6 +29,7 @@ public class CommentRes {
                 .content(dto.getContent())
                 .likeCount(dto.getLikeCount())
                 .option(dto.getOption())
+                .liked(dto.isLiked())
                 .createdDate(dto.getCreatedDate())
                 .deletedDate(dto.getDeletedDate())
                 .build();

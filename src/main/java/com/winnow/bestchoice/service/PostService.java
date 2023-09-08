@@ -1,5 +1,7 @@
 package com.winnow.bestchoice.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.*;
 import com.winnow.bestchoice.exception.CustomException;
@@ -14,6 +16,8 @@ import com.winnow.bestchoice.type.MyPageSort;
 import com.winnow.bestchoice.type.Option;
 import com.winnow.bestchoice.type.PostSort;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.security.core.Authentication;
@@ -23,11 +27,13 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @Transactional
 @RequiredArgsConstructor
 public class PostService {
@@ -39,14 +45,22 @@ public class PostService {
     private final PostTagRepository postTagRepository;
     private final PostLikeRepository postLikeRepository;
     private final ChoiceRepository choiceRepository;
+    private final AttachmentRepository attachmentRepository;
+    private final ReportRepository reportRepository;
+    private final AmazonS3Client amazonS3Client;
     private final TokenProvider tokenProvider;
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+    @Value("${point.popularity}")
+    private int popularityPoint;
+    @Value("${point.report}")
+    private int reportPoint;
 
 
     public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) { // 최적화 - tag 한 번에?
         long memberId = tokenProvider.getMemberId(authentication);
         Member member = memberRepository.findById(memberId).
                 orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));// 쿼리 최적화
-
         Post post = postRepository.save(createPostForm.toEntity(member));
 
         List<String> tags = createPostForm.getTags();
@@ -56,22 +70,36 @@ public class PostService {
             Tag tag = tagRepository.findByName(tagName).orElseGet(() -> tagRepository.save(new Tag(tagName)));
             postTags.add(new PostTag(post, tag));
         }
-
         if (!postTags.isEmpty()) {
             postTagRepository.saveAll(postTags);
         }
 
-        //TODO S3 저장 로직 구현
-        ArrayList<String> resources = new ArrayList<>();
+        List<String> resources = new ArrayList<>();
+        if (!ObjectUtils.isEmpty(files)) {
+            try {
+                for (MultipartFile file : files) {
+                    ObjectMetadata metadata = new ObjectMetadata();
+                    metadata.setContentType(file.getContentType());
+                    metadata.setContentLength(file.getSize());
+                    String fileName = post.getId() + "/" + UUID.randomUUID();
+                    amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
+                    resources.add(fileName);
+                }
+            } catch (Exception e) {
+                log.info("exception is occurred when S3 upload in createPost");
+                throw new CustomException(ErrorCode.SERVER_ERROR);
+            }
+        }
+        List<Attachment> attachments = resources.stream()
+                .map(url -> new Attachment(post, url))
+                .collect(Collectors.toList());
+        attachmentRepository.saveAll(attachments);
 
-        PostDetailRes postDetail = PostDetailRes.of(post);
-        postDetail.setResources(resources);
-
-        return postDetail;
+        return PostDetailRes.of(post, resources);
     }
 
-    public void likePost(Authentication authentication, long postId) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public void likePost(Authentication authentication, long postId) { //최적화
+        long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -88,7 +116,7 @@ public class PostService {
     }
 
     public void unlikePost(Authentication authentication, long postId) { //최적화
-        Long memberId = tokenProvider.getMemberId(authentication);
+        long memberId = tokenProvider.getMemberId(authentication);
 
         PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
@@ -98,12 +126,11 @@ public class PostService {
     }
 
     public void choiceOption(Authentication authentication, long postId, Option choice) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+        long memberId = tokenProvider.getMemberId(authentication);
 
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
-
         if (!postRepository.existsById(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
@@ -127,17 +154,37 @@ public class PostService {
         }
     }
 
-    public PostDetailRes getPostDetail(Authentication authentication, long postId) {
-        long memberId = 0;
-        if (!ObjectUtils.isEmpty(authentication)) {
-            memberId = tokenProvider.getMemberId(authentication);
+    public void reportPost(Authentication authentication, long postId) {
+        long memberId = tokenProvider.getMemberId(authentication);
+        if (!postRepository.existsByIdAndDeletedFalse(postId)) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
-        PostDetailDto postDetailDto = postQueryRepository.getPostDetail(postId, memberId)
+        Member member = memberRepository.getReferenceById(memberId);
+        Post post = postRepository.getReferenceById(postId);
+
+        if (reportRepository.existsByPostAndMember(post, member)) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
+        reportRepository.save(new Report(member, post));
+        if (reportRepository.countByPost(post) >= reportPoint) {
+            postQueryRepository.deletePost(postId);
+        }
+    }
+
+    public PostDetailRes getPostDetail(Authentication authentication, long postId) {
+        Optional<PostDetailDto> postDetailDtoOptional;
+        if (ObjectUtils.isEmpty(authentication)) { //비로그인 사용자
+            postDetailDtoOptional = postQueryRepository.getPostDetail(postId);
+        } else { //로그인한 사용자
+            long memberId = tokenProvider.getMemberId(authentication);
+            postDetailDtoOptional = postQueryRepository.getPostDetailWithLoginMember(postId, memberId);
+        }
+
+        PostDetailDto postDetailDto = postDetailDtoOptional
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        postDetailDto.setResources(Collections.emptyList()); //TODO S3 로직 구현 후 삭제
-
-        return PostDetailRes.of(postDetailDto);
+        return PostDetailRes.of(postDetailDto, attachmentRepository.findUrlsByPostId(postId));
     }
 
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
@@ -158,13 +205,11 @@ public class PostService {
             case COMMENTS : postSlice = postQueryRepository.getSliceFromComments(pageRequest, memberId); break;
             default: throw new IllegalStateException("Unexpected value: " + sort);
         }
-
         return postSlice.map(PostRes::of);
     }
 
     public Slice<PostRes> getPostsByTag(int page, int size, String tag) {
         PageRequest pageRequest = PageRequest.of(page, size);
-
         return postQueryRepository.getSliceByTag(pageRequest, tag).map(PostRes::of);
     }
 

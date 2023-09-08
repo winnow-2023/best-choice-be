@@ -13,6 +13,7 @@ import static com.winnow.bestchoice.entity.QPost.post;
 public enum PostSort {
     LATEST("createdDate", post.createdDate.desc()),
     LIKES("likeCount", post.likeCount.desc()),
+    COMMENTS("commentCount", post.commentCount.desc()),
     HOT("popularityDate", post.popularityDate.desc());
 
     private String value;
