@@ -26,4 +26,5 @@ public class ChatRoomResponse {
         this.nickname = nickname;
         this.createdDate = createdDate;
     }
+
 }

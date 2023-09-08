@@ -62,7 +62,6 @@ public class ChatRoomController {
         return ResponseEntity.ok().body(chatRoomRepository.findAllChatRoom());
     }
 
-
     /**
      * 채팅방 만료시간 연장
      */
@@ -71,9 +70,6 @@ public class ChatRoomController {
         chatRoomRepository.extendExpireTime(roomId);
         return ResponseEntity.ok().build();
     }
-
-
-
 
     private static void validateRequest(Long memberId, Long PostMemberId, Post post) {
         if (!Objects.equals(memberId, PostMemberId)) {

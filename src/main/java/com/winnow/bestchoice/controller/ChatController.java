@@ -29,5 +29,4 @@ public class ChatController {
 
         chatService.sendChatMessage(message);
     }
-
 }
