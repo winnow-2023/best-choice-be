@@ -5,11 +5,6 @@ spring:
     password: winnow2023!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-#  h2:
-#    console:
-#      path: /h2-console
-#      enabled: true
-
   jpa:
     show-sql: true
     hibernate:
