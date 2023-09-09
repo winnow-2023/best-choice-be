@@ -95,7 +95,7 @@ public class PostQueryRepository {
     public Slice<PostSummaryDto> getSliceFromComments(Pageable pageable, long memberId) {// todo 댓글의 생성일로 정렬하도록 변경
         List<PostSummaryDto> content = getPostSummaryDtosQuery().distinct()
                 .join(comment).on(comment.post.eq(post))
-                .where(comment.member.id.eq(memberId))
+                .where(comment.member.id.eq(memberId), comment.deletedDate.isNull())
                 .orderBy(post.createdDate.desc())
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
