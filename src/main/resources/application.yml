@@ -72,6 +72,7 @@ spring:
   servlet:
     multipart:
       max-request-size: 100MB
+      max-file-size: 100MB
 
 
 # jwt issuer, secret key 설정

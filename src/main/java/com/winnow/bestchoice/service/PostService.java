@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -56,9 +55,16 @@ public class PostService {
     private int popularityPoint;
     @Value("${point.report}")
     private int reportPoint;
+    private final String IMAGE_PATH = "image/";
+    private final String VIDEO_PATH = "video/";
+    private final int MAX_ATTACHMENT_SIZE = 5;
 
 
-    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> files, Authentication authentication) { // 최적화 - tag 한 번에?
+    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> imageFiles, List<MultipartFile> videoFiles, Authentication authentication) { // 최적화 - tag 한 번에?
+        if (!ObjectUtils.isEmpty(imageFiles) && !ObjectUtils.isEmpty(videoFiles) &&
+                imageFiles.size() + videoFiles.size() > MAX_ATTACHMENT_SIZE) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
         long memberId = tokenProvider.getMemberId(authentication);
         Member member = memberRepository.findById(memberId).
                 orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));// 쿼리 최적화
@@ -76,13 +82,33 @@ public class PostService {
         }
 
         List<String> resources = new ArrayList<>();
+        saveImageFiles(imageFiles, post.getId(), resources);
+        saveVideoFiles(videoFiles, post.getId(), resources);
+
+        List<Attachment> attachments = resources.stream()
+                .map(url -> new Attachment(post, url))
+                .collect(Collectors.toList());
+        attachmentRepository.saveAll(attachments);
+
+        return PostDetailRes.of(post, resources);
+    }
+
+    private void saveImageFiles(List<MultipartFile> imageFiles, long postId, List<String> resources) {
+        saveFilesToS3(imageFiles, postId, resources, IMAGE_PATH);
+    }
+
+    private void saveVideoFiles(List<MultipartFile> videoFiles, long postId, List<String> resources) {
+        saveFilesToS3(videoFiles, postId, resources, VIDEO_PATH);
+    }
+
+    private void saveFilesToS3(List<MultipartFile> files, long postId, List<String> resources, String path) {
         if (!ObjectUtils.isEmpty(files)) {
             try {
                 for (MultipartFile file : files) {
                     ObjectMetadata metadata = new ObjectMetadata();
                     metadata.setContentType(file.getContentType());
                     metadata.setContentLength(file.getSize());
-                    String fileName = post.getId() + "/" + UUID.randomUUID();
+                    String fileName = path + postId + "/" + UUID.randomUUID();
                     amazonS3Client.putObject(bucket, fileName, file.getInputStream(), metadata);
                     resources.add(fileName);
                 }
@@ -91,12 +117,6 @@ public class PostService {
                 throw new CustomException(ErrorCode.SERVER_ERROR);
             }
         }
-        List<Attachment> attachments = resources.stream()
-                .map(url -> new Attachment(post, url))
-                .collect(Collectors.toList());
-        attachmentRepository.saveAll(attachments);
-
-        return PostDetailRes.of(post, resources);
     }
 
     public void likePost(Authentication authentication, long postId) { //최적화
