@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.util.Optional;
+
 public interface PostRepository extends JpaRepository<Post, Long> {
 
     @Modifying
@@ -30,6 +32,8 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Modifying
     @Query("update Post p set p.commentCount=p.commentCount-1 where p.id=:id")
     void minusCommentCountById(long id);
+
+    Optional<Post> findByIdAndDeletedFalse(long postId);
 
     boolean existsByIdAndDeletedFalse(long postId);
 }
