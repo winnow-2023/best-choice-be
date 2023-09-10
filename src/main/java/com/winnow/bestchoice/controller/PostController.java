@@ -30,8 +30,9 @@ public class PostController {
     @PostMapping("/api/posts")
     public ResponseEntity<?> createPost(Authentication authentication,
                                         @RequestPart("data") @Valid CreatePostForm createPostForm,
-                                        @RequestPart(name = "file", required = false) @Size(max = 5) List<MultipartFile> files) {
-        PostDetailRes postDetail = postService.createPost(createPostForm, files, authentication);
+                                        @RequestPart(name = "imageFile", required = false) @Size(max = 5) List<MultipartFile> imageFiles,
+                                        @RequestPart(name = "videoFile", required = false) @Size(max = 5) List<MultipartFile> videoFiles) {
+        PostDetailRes postDetail = postService.createPost(createPostForm, imageFiles, videoFiles, authentication);
         return ResponseEntity.status(HttpStatus.CREATED).body(postDetail);
     }
 
