@@ -4,7 +4,6 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import com.winnow.bestchoice.entity.QReport;
 import com.winnow.bestchoice.model.dto.PostDetailDto;
 import com.winnow.bestchoice.model.dto.PostSummaryDto;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +12,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,8 +30,19 @@ import static com.winnow.bestchoice.entity.QTag.tag;
 public class PostQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
-    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {// todo popularityDate null 제외 조회 처리
+    public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {
         List<PostSummaryDto> content = getPostSummaryDtosQuery()
+                .orderBy(type)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize() + 1)
+                .fetch();
+
+        return getSlice(pageable, content);
+    }
+
+    public Slice<PostSummaryDto> getSliceByPopularity(Pageable pageable, OrderSpecifier<?> type) {
+        List<PostSummaryDto> content = getPostSummaryDtosQuery()
+                .where(post.popularityDate.isNotNull())
                 .orderBy(type)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize() + 1)
@@ -131,6 +142,22 @@ public class PostQueryRepository {
     public void deletePost(long postId) {
         jpaQueryFactory.update(post)
                 .set(post.deleted, true)
+                .where(post.id.eq(postId))
+                .execute();
+    }
+
+    public void plusLikeCountAndSetPopularityById(long postId) {
+        jpaQueryFactory.update(post)
+                .set(post.popularityDate, LocalDateTime.now())
+                .set(post.likeCount, post.likeCount.add(1))
+                .where(post.id.eq(postId))
+                .execute();
+    }
+
+    public void minusLikeCountAndCancelPopularityById(long postId) {
+        jpaQueryFactory.update(post)
+                .set(post.popularityDate, (LocalDateTime) null)
+                .set(post.likeCount, post.likeCount.add(-1))
                 .where(post.id.eq(postId))
                 .execute();
     }

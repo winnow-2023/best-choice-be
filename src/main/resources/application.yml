@@ -84,5 +84,5 @@ server:
   port: 8080
 
 point:
-  popularity: 1
+  popularity: 2
   report: 2

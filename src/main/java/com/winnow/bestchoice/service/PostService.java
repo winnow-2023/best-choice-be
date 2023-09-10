@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -100,29 +101,34 @@ public class PostService {
 
     public void likePost(Authentication authentication, long postId) { //최적화
         long memberId = tokenProvider.getMemberId(authentication);
+        Post post = postRepository.findByIdAndDeletedFalse(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
-        if (!memberRepository.existsById(memberId)) {
-            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
-        }
-        if (!postRepository.existsById(postId)) {
-            throw new CustomException(ErrorCode.POST_NOT_FOUND);
-        }
         if (postLikeRepository.existsByPost_IdAndMember_Id(postId, memberId)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
 
-        postLikeRepository.save(new PostLike(new Member(memberId), new Post(postId)));
-        postRepository.plusLikeCountById(postId);
+        postLikeRepository.save(new PostLike(new Member(memberId), post));
+        if (ObjectUtils.isEmpty(post.getPopularityDate()) && post.getLikeCount() + 1 >= popularityPoint) {
+            postQueryRepository.plusLikeCountAndSetPopularityById(postId);
+        } else {
+            postRepository.plusLikeCountById(postId);
+        }
     }
 
     public void unlikePost(Authentication authentication, long postId) { //최적화
         long memberId = tokenProvider.getMemberId(authentication);
-
+        Post post = postRepository.findByIdAndDeletedFalse(postId)
+                .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
         postLikeRepository.delete(postLike);
-        postRepository.minusLikeCountById(postId);
+        if (!ObjectUtils.isEmpty(post.getPopularityDate()) && post.getLikeCount() <= popularityPoint) {
+            postQueryRepository.minusLikeCountAndCancelPopularityById(postId);
+        } else {
+            postRepository.minusLikeCountById(postId);
+        }
     }
 
     public void choiceOption(Authentication authentication, long postId, Option choice) {
@@ -189,8 +195,11 @@ public class PostService {
 
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
-        Slice<PostSummaryDto> slice = postQueryRepository.getSlice(pageRequest, sort.getType());
-        return slice.map(PostRes::of);
+        if (sort == PostSort.HOT) {
+            return postQueryRepository.getSliceByPopularity(pageRequest, sort.getType()).map(PostRes::of);
+        } else {
+            return postQueryRepository.getSlice(pageRequest, sort.getType()).map(PostRes::of);
+        }
     }
 
     public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
