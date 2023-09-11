@@ -1,6 +1,7 @@
 package com.winnow.bestchoice.entity;
 
 import com.winnow.bestchoice.config.converter.TagsToJsonConverter;
+import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -64,4 +65,5 @@ public class Post {
     private boolean deleted;
 
     public Post(Long id) {this.id = id;}
+
 }
