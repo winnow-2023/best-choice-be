@@ -24,6 +24,7 @@ import static com.winnow.bestchoice.model.dto.ChatMessage.MessageType.*;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Order(value = Ordered.HIGHEST_PRECEDENCE)
 public class StompHandler implements ChannelInterceptor {
 
     private final TokenProvider tokenProvider;
@@ -80,7 +81,7 @@ public class StompHandler implements ChannelInterceptor {
     private void disconnectProcess(Message<?> message, StompHeaderAccessor accessor) {
 //        String sessionId = (String) message.getHeaders().get("simpSessionId");
         String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("Destination")).orElse("InvalidRoomId"));
+                .get("destination")).orElse("InvalidRoomId"));
 
         chatRoomRepository.minusUserCount(roomId);
 

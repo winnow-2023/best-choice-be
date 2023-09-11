@@ -75,8 +75,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                     .authorizeRequests()
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                    .antMatchers("/login/**", "/pub/**", "/sub/**").permitAll()
-                    .antMatchers("/api/**", "/chat/**").authenticated()
+                    .antMatchers("/login/**", "/pub/**", "/sub/**", "/chat/**").permitAll()
+                    .antMatchers("/api/**").authenticated()
                 .and()
                     .oauth2Login()
                     .authorizationEndpoint()
@@ -158,7 +158,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
        corsConfig.setAllowCredentials(true);
-       corsConfig.addAllowedOriginPattern("*");
+       corsConfig.addAllowedOrigin("http://localhost:5173");
+       corsConfig.addAllowedOrigin("ws://localhost:5173/ws-stomp");
+       corsConfig.addAllowedOrigin("ws://localhost:5173");
        corsConfig.addAllowedHeader("*");
        corsConfig.addAllowedMethod("*");
 
