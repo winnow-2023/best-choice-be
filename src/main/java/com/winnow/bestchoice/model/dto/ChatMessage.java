@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
+@ToString
 public class ChatMessage {
     // 메세지 타입 : 입장, 퇴장, 채팅
     public enum MessageType {
