@@ -24,7 +24,6 @@ import static com.winnow.bestchoice.model.dto.ChatMessage.MessageType.*;
 @Slf4j
 @RequiredArgsConstructor
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class StompHandler implements ChannelInterceptor {
 
     private final TokenProvider tokenProvider;
