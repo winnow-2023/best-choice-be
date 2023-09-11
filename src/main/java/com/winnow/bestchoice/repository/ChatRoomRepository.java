@@ -106,7 +106,6 @@ public class ChatRoomRepository {
     public void deleteChatRoom(String roomId) {
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
         valueOps.getAndDelete(USER_COUNT + "_" + roomId);
-        hashOpsEnterInfo.delete(ENTER_INFO, roomId);
     }
 
 }
