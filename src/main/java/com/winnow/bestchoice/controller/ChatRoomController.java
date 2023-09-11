@@ -11,12 +11,10 @@ import com.winnow.bestchoice.repository.PostRepository;
 import com.winnow.bestchoice.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Objects;
@@ -58,16 +56,26 @@ public class ChatRoomController {
      * 채팅방 리스트
      */
     @GetMapping("/chat/rooms")
-    public ResponseEntity<List<ChatRoomResponse>> findAllChatRoom() {
-        return ResponseEntity.ok().body(chatRoomRepository.findAllChatRoom());
+    public ResponseEntity<List<ChatRoomResponse>> findAllChatRoom(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size)
+    {
+        return ResponseEntity.ok().body((List<ChatRoomResponse>) chatRoomRepository.findAllChatRoom(page, size));
     }
 
     /**
-     * 채팅방 만료시간 연장
+     * 채팅방 삭제
      */
-    @PostMapping("/chat/extend/{roomId}")
-    public ResponseEntity<?> extendExpiredTime(@PathVariable String roomId) {
-        chatRoomRepository.extendExpireTime(roomId);
+    @DeleteMapping("/chat/rooms/{roomId}")
+    public ResponseEntity<?> deleteChatRoom(@PathVariable String roomId, Authentication authentication) {
+        Long memberId = tokenProvider.getMemberId(authentication);
+        Long writerId = postService.findByPostId(Long.parseLong(roomId)).getMember().getId();
+
+        if (!Objects.equals(memberId, writerId)) {
+            throw new CustomException(ErrorCode.POST_MEMBER_ID_MISS_MATCH);
+        }
+        chatRoomRepository.deleteChatRoom(roomId);
+
         return ResponseEntity.ok().build();
     }
 

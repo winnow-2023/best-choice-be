@@ -1,6 +1,8 @@
 package com.winnow.bestchoice.config.handler;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
+import com.winnow.bestchoice.exception.CustomException;
+import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatMessage;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
 import com.winnow.bestchoice.service.ChatService;
@@ -55,6 +57,10 @@ public class StompHandler implements ChannelInterceptor {
                 .get("simpDestination")).orElse("InvalidRoomId"));
         String sessionId = (String) message.getHeaders().get("simpSessionId");
 
+        if (!checkCapacity(roomId)) {
+            throw new CustomException(ErrorCode.CHATROOM_CAPACITY_EXCEEDED);
+        }
+
         chatRoomRepository.setUserEnterInfo(sessionId, roomId);
         chatRoomRepository.plusUserCount(roomId);
 
@@ -62,6 +68,11 @@ public class StompHandler implements ChannelInterceptor {
         sendChatMessage(ENTER, roomId, nickname);
 
         log.info("[SUBSCRIBED] 닉네임 : {}, 채팅방 : {}", nickname, roomId);
+    }
+
+    private boolean checkCapacity(String roomId) {
+        long userCount = chatRoomRepository.getUserCount(roomId);
+        return userCount < 10;
     }
 
     private void disconnectProcess(Message<?> message, StompHeaderAccessor accessor) {

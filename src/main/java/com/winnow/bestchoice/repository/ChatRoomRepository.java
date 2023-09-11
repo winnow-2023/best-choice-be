@@ -1,22 +1,19 @@
 package com.winnow.bestchoice.repository;
 
+import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
+import com.winnow.bestchoice.model.dto.ChatRoomPage;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -46,25 +43,25 @@ public class ChatRoomRepository {
         );
     }
 
-    public List<ChatRoomResponse> findAllChatRoom() {
+    // 채팅방 목록 조회
+    public ChatRoomPage<List<ChatRoomResponse>> findAllChatRoom(int pageNumber, int pageSize) {
+        ArrayList<ChatRoomResponse> chatRooms = new ArrayList<>();
         Set<String> roomIds = hashOpsChatRoom.keys(CHAT_ROOMS);
-        List<ChatRoomResponse> chatRooms = roomIds.stream()
-                .map(roomId -> postRepository.findById(Long.parseLong(roomId)))
-                .filter(Optional::isPresent)
-                .map(Optional::get)
-                .map(chatRoom -> ChatRoomResponse.builder()
-                        .title(chatRoom.getTitle())
-                        .optionA(chatRoom.getOptionA())
-                        .optionB(chatRoom.getOptionB())
-                        .likeCount(chatRoom.getLikeCount())
-                        .commentCount(chatRoom.getCommentCount())
-                        .nickname(chatRoom.getMember().getNickname())
-                        .createdDate(chatRoom.getCreatedDate())
-                        .build()
-                )
-                .collect(Collectors.toList());
 
-        return chatRooms;
+        for (String roomId: roomIds) {
+            Post post = postRepository.findById(Long.parseLong(roomId)).orElseThrow(
+                    () -> new CustomException(ErrorCode.POST_NOT_FOUND));
+            ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+
+            ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
+
+            chatRooms.add(chatRoomResponse);
+        }
+
+        chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getCreatedDate()));
+        ChatRoomPage<?> chatRoomPage = new ChatRoomPage<>(chatRooms, pageSize);
+
+        return (ChatRoomPage<List<ChatRoomResponse>>) chatRoomPage.getPage(pageNumber);
     }
 
     // 채팅방 생성
@@ -105,13 +102,11 @@ public class ChatRoomRepository {
                 .filter(count -> count > 0).orElse(0L);
     }
 
-    // 채팅방 만료시간 연장(30분)
-    public void extendExpireTime(String roomId) {
-        ChatRoom chatRoom = Optional.ofNullable(hashOpsChatRoom.get(CHAT_ROOMS, roomId)).orElseThrow(
-                () -> new CustomException(ErrorCode.CHATROOM_NOT_FOUND)
-        );
-
-        chatRoom.setExpireTime(chatRoom.getExpireTime().plusMinutes(EXTEND_MINUTE));
+    // 채팅방 삭제
+    public void deleteChatRoom(String roomId) {
+        hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
+        valueOps.getAndDelete(USER_COUNT + "_" + roomId);
+        hashOpsEnterInfo.delete(ENTER_INFO, roomId);
     }
 
 }
