@@ -54,14 +54,14 @@ public class StompHandler implements ChannelInterceptor {
 
     private void enterProcess(Message<?> message, StompHeaderAccessor accessor) {
         String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("simpDestination")).orElse("InvalidRoomId"));
-        String sessionId = (String) message.getHeaders().get("simpSessionId");
+                .get("Destination")).orElse("InvalidRoomId"));
+//        String sessionId = (String) message.getHeaders().get("SessionId");
 
         if (!checkCapacity(roomId)) {
             throw new CustomException(ErrorCode.CHATROOM_CAPACITY_EXCEEDED);
         }
 
-        chatRoomRepository.setUserEnterInfo(sessionId, roomId);
+//        chatRoomRepository.setUserEnterInfo(sessionId, roomId);
         chatRoomRepository.plusUserCount(roomId);
 
         String nickname = getNicknameByToken(accessor);
@@ -76,16 +76,17 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void disconnectProcess(Message<?> message, StompHeaderAccessor accessor) {
-        String sessionId = (String) message.getHeaders().get("simpSessionId");
-        String roomId = chatRoomRepository.getUserEnterRoomId(sessionId);
+//        String sessionId = (String) message.getHeaders().get("simpSessionId");
+        String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
+                .get("Destination")).orElse("InvalidRoomId"));
 
         chatRoomRepository.minusUserCount(roomId);
 
         String nickname = getNicknameByToken(accessor);
         sendChatMessage(QUIT, roomId, nickname);
-        chatRoomRepository.removeUserEnterInfo(sessionId);
+//        chatRoomRepository.removeUserEnterInfo(sessionId);
 
-        log.info("[DISCONNECTED] sessionId : {}, roomId : {}", sessionId, roomId);
+        log.info("[DISCONNECTED] roomId : {}", roomId);
     }
 
 
