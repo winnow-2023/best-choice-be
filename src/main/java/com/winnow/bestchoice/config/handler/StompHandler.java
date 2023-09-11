@@ -8,6 +8,8 @@ import com.winnow.bestchoice.repository.ChatRoomRepository;
 import com.winnow.bestchoice.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
@@ -22,6 +24,7 @@ import static com.winnow.bestchoice.model.dto.ChatMessage.MessageType.*;
 @Slf4j
 @RequiredArgsConstructor
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class StompHandler implements ChannelInterceptor {
 
     private final TokenProvider tokenProvider;
@@ -54,7 +57,7 @@ public class StompHandler implements ChannelInterceptor {
 
     private void enterProcess(Message<?> message, StompHeaderAccessor accessor) {
         String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("Destination")).orElse("InvalidRoomId"));
+                .get("destination")).orElse("InvalidRoomId"));
 //        String sessionId = (String) message.getHeaders().get("SessionId");
 
         if (!checkCapacity(roomId)) {
