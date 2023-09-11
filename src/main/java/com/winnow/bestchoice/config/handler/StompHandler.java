@@ -56,8 +56,7 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void enterProcess(Message<?> message, StompHeaderAccessor accessor) {
-        String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("destination")).orElse("InvalidRoomId"));
+        String roomId = (String) message.getHeaders().get("roomId");
 //        String sessionId = (String) message.getHeaders().get("SessionId");
 
         if (!checkCapacity(roomId)) {
