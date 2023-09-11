@@ -103,7 +103,7 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private static String getTokenByHeader(StompHeaderAccessor accessor) {
-        return accessor.getFirstNativeHeader("token");
+        return (String) accessor.getHeader("token");
     }
 
 }
