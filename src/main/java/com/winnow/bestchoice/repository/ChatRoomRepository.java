@@ -58,7 +58,7 @@ public class ChatRoomRepository {
             chatRooms.add(chatRoomResponse);
         }
 
-        chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getCreatedDate()));
+        chatRooms.sort((o1, o2) -> o2.getCreatedDate().compareTo(o1.getCreatedDate()));
         ChatRoomPage<?> chatRoomPage = new ChatRoomPage<>(chatRooms, pageSize);
 
         return (ChatRoomPage<List<ChatRoomResponse>>) chatRoomPage.getPage(pageNumber);

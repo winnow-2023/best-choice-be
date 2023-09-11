@@ -17,12 +17,10 @@ public class ChatRoom implements Serializable {
 
     private String roomId;
     private long userCount; // 채팅방 인원수
-    private LocalDateTime createdDate;
 
     public static ChatRoom create(String roomId) {
         ChatRoom chatRoom = new ChatRoom();
         chatRoom.roomId = roomId;
-        chatRoom.createdDate = LocalDateTime.now();
 
         return chatRoom;
     }

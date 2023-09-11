@@ -31,7 +31,6 @@ public class ChatRoomResponse{
                 .commentCount(post.getCommentCount())
                 .nickname(post.getMember().getNickname())
                 .createdDate(post.getCreatedDate())
-                .chatRoomCreatedDate(chatRoom.getCreatedDate())
                 .userCount(chatRoom.getUserCount())
                 .build();
     }
