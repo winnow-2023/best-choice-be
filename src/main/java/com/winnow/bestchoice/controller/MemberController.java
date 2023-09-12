@@ -32,7 +32,7 @@ public class MemberController {
     public ResponseEntity<?> checkNickname(@RequestBody CheckNicknameRequest request) {
         Boolean result = memberService.validNickname(request.getNickname());
 
-        return new ResponseEntity<>(new CheckNicknameResponse(result), HttpStatus.OK);
+        return ResponseEntity.ok().body(new CheckNicknameResponse(result));
     }
 
     @GetMapping("/mypage")
