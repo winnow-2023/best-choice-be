@@ -30,6 +30,24 @@ import static com.winnow.bestchoice.entity.QTag.tag;
 public class PostQueryRepository {
     private final JPAQueryFactory jpaQueryFactory;
 
+    public List<Long> findMemberIdRelatedWithLikeByPostId(long postId) {
+        return jpaQueryFactory.select(postLike.member.id).distinct()
+                .from(postLike).where(postLike.post.id.eq(postId))
+                .fetch();
+    }
+
+    public List<Long> findMemberIdRelatedWithChoiceByPostId(long postId) {
+        return jpaQueryFactory.select(choice.member.id).distinct()
+                .from(choice).where(choice.post.id.eq(postId))
+                .fetch();
+    }
+
+    public List<Long> findMemberIdRelatedWithCommentByPostId(long postId) {
+        return jpaQueryFactory.select(comment.member.id).distinct()
+                .from(comment).where(comment.post.id.eq(postId))
+                .fetch();
+    }
+
     public Slice<PostSummaryDto> getSlice(Pageable pageable, OrderSpecifier<?> type) {
         List<PostSummaryDto> content = getPostSummaryDtosQuery()
                 .orderBy(type)
