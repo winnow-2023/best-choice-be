@@ -1,15 +1,20 @@
 package com.winnow.bestchoice.service;
 
+import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Notification;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.model.dto.CreatingRoomNotificationData;
+import com.winnow.bestchoice.model.response.NotificationRes;
 import com.winnow.bestchoice.repository.EmitterRepository;
 import com.winnow.bestchoice.repository.NotificationRepository;
 import com.winnow.bestchoice.repository.PostQueryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -24,6 +29,7 @@ import java.util.List;
 public class NotificationService {
 
     private static final Long TIMEOUT = 60L * 1000 * 60;
+    private final TokenProvider tokenProvider;
     private final PostQueryRepository postQueryRepository;
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
@@ -54,6 +60,7 @@ public class NotificationService {
         List<Long> memberIdByLike = postQueryRepository.findMemberIdRelatedWithLikeByPostId(postId);
         List<Long> memberIdByChoice = postQueryRepository.findMemberIdRelatedWithChoiceByPostId(postId);
         List<Long> memberIdByComment = postQueryRepository.findMemberIdRelatedWithCommentByPostId(postId);
+
         HashSet<Long> memberIds = new HashSet<>();
         memberIds.addAll(memberIdByLike);
         memberIds.addAll(memberIdByChoice);
@@ -86,5 +93,13 @@ public class NotificationService {
         emitter.onTimeout(() -> emitterRepository.deleteById(id));
 
         return emitter;
+    }
+
+    public Slice<NotificationRes> getNotifications(Authentication authentication, int page, int size) {
+        long memberId = tokenProvider.getMemberId(authentication);
+        PageRequest pageRequest = PageRequest.of(page, size);
+
+        return notificationRepository.findByMember_IdOrderByCreatedDateDesc(memberId, pageRequest)
+                .map(NotificationRes::of);
     }
 }
