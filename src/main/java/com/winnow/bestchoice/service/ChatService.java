@@ -32,7 +32,6 @@ public class ChatService {
         chatMessage.setUserCount(chatRoomRepository.getUserCount(chatMessage.getRoomId()));
 
         if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
-            chatRoomRepository.enterChatRoom(chatMessage.getRoomId());
             chatMessage.setSender("[알림]");
             chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
 
