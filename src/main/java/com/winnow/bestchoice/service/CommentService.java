@@ -34,13 +34,10 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final TokenProvider tokenProvider;
 
-    public void createComment(Authentication authentication, long postId, CreateCommentForm commentForm) {
-        long memberId = tokenProvider.getMemberId(authentication);
-
+    public void createComment(long memberId, long postId, CreateCommentForm commentForm) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
-
         if (!postRepository.existsById(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
@@ -55,9 +52,7 @@ public class CommentService {
         postRepository.plusCommentCountById(postId);
     }
 
-    public void likeComment(Authentication authentication, long commentId) {
-        long memberId = tokenProvider.getMemberId(authentication);
-
+    public void likeComment(long memberId, long commentId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
@@ -75,9 +70,7 @@ public class CommentService {
         commentRepository.plusLikeCountById(commentId);
     }
 
-    public void unlikeComment(Authentication authentication, long commentId) {
-        long memberId = tokenProvider.getMemberId(authentication);
-
+    public void unlikeComment(long memberId, long commentId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
@@ -94,13 +87,10 @@ public class CommentService {
         commentRepository.minusLikeCountById(commentId);
     }
 
-    public void deleteComment(Authentication authentication, long commentId) {
-        long memberId = tokenProvider.getMemberId(authentication);
-
+    public void deleteComment(long memberId, long commentId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
-
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new CustomException(ErrorCode.COMMENT_NOT_FOUND));
 
