@@ -1,18 +1,14 @@
 package com.winnow.bestchoice.controller;
 
-import com.winnow.bestchoice.config.jwt.TokenProvider;
-import com.winnow.bestchoice.model.request.CheckNicknameRequest;
 import com.winnow.bestchoice.model.request.UpdateNicknameRequest;
 import com.winnow.bestchoice.model.response.CheckNicknameResponse;
 import com.winnow.bestchoice.model.response.MemberDetailRes;
 import com.winnow.bestchoice.service.MemberService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 @RestController
@@ -29,8 +25,8 @@ public class MemberController {
     }
 
     @GetMapping("/nickname-check")
-    public ResponseEntity<?> checkNickname(@RequestBody CheckNicknameRequest request) {
-        Boolean result = memberService.validNickname(request.getNickname());
+    public ResponseEntity<CheckNicknameResponse> checkNickname(@RequestParam String nickname) {
+        Boolean result = memberService.validNickname(nickname);
 
         return ResponseEntity.ok().body(new CheckNicknameResponse(result));
     }
@@ -39,4 +35,5 @@ public class MemberController {
     public ResponseEntity<MemberDetailRes> getMyInfo(Authentication authentication) {
         return ResponseEntity.ok(memberService.getMemberDetail(authentication));
     }
+    
 }
