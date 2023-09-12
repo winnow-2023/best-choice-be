@@ -1,10 +1,12 @@
 package com.winnow.bestchoice.config.handler;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
+import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatMessage;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
+import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,7 @@ public class StompHandler implements ChannelInterceptor {
     private final TokenProvider tokenProvider;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatService chatService;
+    private final MemberRepository memberRepository;
 
     // WebSocket을 통해 들어온 요청이 처리 되기 전 실행된다.
     @Override
@@ -67,7 +70,11 @@ public class StompHandler implements ChannelInterceptor {
 
         chatRoomRepository.plusUserCount(roomId);
 
-        String nickname = getNicknameByToken(accessor);
+        String jwtToken = getTokenByHeader(accessor);
+        Long memberId = tokenProvider.getMemberId(jwtToken);
+        Member member = memberRepository.findById(memberId).get();
+
+        String nickname = member.getNickname();
         sendChatMessage(ENTER, roomId, nickname);
 
         log.info("[SUBSCRIBED] 닉네임 : {}, 채팅방 : {}", nickname, roomId);
@@ -88,7 +95,11 @@ public class StompHandler implements ChannelInterceptor {
 
         chatRoomRepository.minusUserCount(roomId);
 
-        String nickname = getNicknameByToken(accessor);
+        String jwtToken = getTokenByHeader(accessor);
+        Long memberId = tokenProvider.getMemberId(jwtToken);
+        Member member = memberRepository.findById(memberId).get();
+
+        String nickname = member.getNickname();
         sendChatMessage(QUIT, roomId, nickname);
 //        chatRoomRepository.removeUserEnterInfo(sessionId);
 
@@ -104,10 +115,6 @@ public class StompHandler implements ChannelInterceptor {
                 .build());
     }
 
-    private String getNicknameByToken(StompHeaderAccessor accessor) {
-        String token = getTokenByHeader(accessor);
-        return tokenProvider.getNickname(token);
-    }
 
     private static String getTokenByHeader(StompHeaderAccessor accessor) {
         return accessor.getFirstNativeHeader("token");
