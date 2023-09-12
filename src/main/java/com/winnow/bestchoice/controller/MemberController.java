@@ -1,6 +1,5 @@
 package com.winnow.bestchoice.controller;
 
-import com.winnow.bestchoice.model.request.CheckNicknameRequest;
 import com.winnow.bestchoice.model.request.UpdateNicknameRequest;
 import com.winnow.bestchoice.model.response.CheckNicknameResponse;
 import com.winnow.bestchoice.model.response.MemberDetailRes;
@@ -26,8 +25,8 @@ public class MemberController {
     }
 
     @GetMapping("/nickname-check")
-    public ResponseEntity<CheckNicknameResponse> checkNickname(@RequestBody CheckNicknameRequest request) {
-        Boolean result = memberService.validNickname(request.getNickname());
+    public ResponseEntity<CheckNicknameResponse> checkNickname(@RequestParam String nickname) {
+        Boolean result = memberService.validNickname(nickname);
 
         return ResponseEntity.ok().body(new CheckNicknameResponse(result));
     }
