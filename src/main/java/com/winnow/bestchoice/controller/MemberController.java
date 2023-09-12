@@ -1,12 +1,12 @@
 package com.winnow.bestchoice.controller;
 
+import com.winnow.bestchoice.annotation.LoginMemberId;
 import com.winnow.bestchoice.model.request.UpdateNicknameRequest;
 import com.winnow.bestchoice.model.response.CheckNicknameResponse;
 import com.winnow.bestchoice.model.response.MemberDetailRes;
 import com.winnow.bestchoice.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -19,8 +19,8 @@ public class MemberController {
     private final MemberService memberService;
 
     @PutMapping
-    public ResponseEntity<?> updateNickname(@RequestBody @Valid UpdateNicknameRequest request, Authentication authentication) {
-        memberService.updateNickname(request.getNickname(), authentication);
+    public ResponseEntity<?> updateNickname(@RequestBody @Valid UpdateNicknameRequest request, @LoginMemberId long memberId) {
+        memberService.updateNickname(request.getNickname(), memberId);
         return ResponseEntity.ok().build();
     }
 
@@ -32,8 +32,8 @@ public class MemberController {
     }
 
     @GetMapping("/mypage")
-    public ResponseEntity<MemberDetailRes> getMyInfo(Authentication authentication) {
-        return ResponseEntity.ok(memberService.getMemberDetail(authentication));
+    public ResponseEntity<MemberDetailRes> getMyInfo(@LoginMemberId long memberId) {
+        return ResponseEntity.ok(memberService.getMemberDetail(memberId));
     }
     
 }
