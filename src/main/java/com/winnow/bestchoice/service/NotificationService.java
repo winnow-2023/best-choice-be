@@ -4,6 +4,8 @@ import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Notification;
 import com.winnow.bestchoice.entity.Post;
+import com.winnow.bestchoice.exception.CustomException;
+import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.CreatingRoomNotificationData;
 import com.winnow.bestchoice.model.response.NotificationRes;
 import com.winnow.bestchoice.repository.EmitterRepository;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.io.IOException;
@@ -101,5 +104,22 @@ public class NotificationService {
 
         return notificationRepository.findByMember_IdOrderByCreatedDateDesc(memberId, pageRequest)
                 .map(NotificationRes::of);
+    }
+
+    public void deleteNotification(Authentication authentication, long notificationId) {
+        long memberId = tokenProvider.getMemberId(authentication);
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
+
+        if (memberId != notification.getMember().getId()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+        notificationRepository.deleteById(notificationId);
+    }
+
+    @Transactional
+    public void deleteAllNotifications(Authentication authentication) {
+        long memberId = tokenProvider.getMemberId(authentication);
+        notificationRepository.deleteAllByMemberId(memberId);
     }
 }
