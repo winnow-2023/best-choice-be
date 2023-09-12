@@ -2,6 +2,7 @@ package com.winnow.bestchoice.controller;
 
 import com.winnow.bestchoice.model.request.CheckNicknameRequest;
 import com.winnow.bestchoice.model.request.UpdateNicknameRequest;
+import com.winnow.bestchoice.model.response.CheckNicknameResponse;
 import com.winnow.bestchoice.model.response.MemberDetailRes;
 import com.winnow.bestchoice.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -25,10 +26,10 @@ public class MemberController {
     }
 
     @GetMapping("/nickname-check")
-    public ResponseEntity<?> checkNickname(@RequestBody CheckNicknameRequest request) {
+    public ResponseEntity<CheckNicknameResponse> checkNickname(@RequestBody CheckNicknameRequest request) {
         Boolean result = memberService.validNickname(request.getNickname());
 
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok().body(new CheckNicknameResponse(result));
     }
 
     @GetMapping("/mypage")
