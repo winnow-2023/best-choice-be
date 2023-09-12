@@ -46,7 +46,7 @@ public class NotificationService {
         return emitter;
     }
 
-    @Async
+    @Async("notificationExecutor")
     public void notifyCreatingRoomByPostId(Post post) {
         HashSet<Long> memberIds = getRelatedMemberIds(post.getId());
         CreatingRoomNotificationData data = CreatingRoomNotificationData.of(post);
