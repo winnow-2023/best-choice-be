@@ -1,6 +1,5 @@
 package com.winnow.bestchoice.service;
 
-import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Notification;
 import com.winnow.bestchoice.entity.Post;
@@ -16,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -32,7 +30,6 @@ import java.util.List;
 public class NotificationService {
 
     private static final Long TIMEOUT = 60L * 1000 * 60;
-    private final TokenProvider tokenProvider;
     private final PostQueryRepository postQueryRepository;
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
@@ -98,16 +95,14 @@ public class NotificationService {
         return emitter;
     }
 
-    public Slice<NotificationRes> getNotifications(Authentication authentication, int page, int size) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    public Slice<NotificationRes> getNotifications(long memberId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
         return notificationRepository.findByMember_IdOrderByCreatedDateDesc(memberId, pageRequest)
                 .map(NotificationRes::of);
     }
 
-    public void deleteNotification(Authentication authentication, long notificationId) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    public void deleteNotification(long memberId, long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
 
@@ -118,8 +113,7 @@ public class NotificationService {
     }
 
     @Transactional
-    public void deleteAllNotifications(Authentication authentication) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    public void deleteAllNotifications(long memberId) {
         notificationRepository.deleteAllByMemberId(memberId);
     }
 }
