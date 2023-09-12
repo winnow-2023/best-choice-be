@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import static com.winnow.bestchoice.model.dto.ChatMessage.MessageType.*;
@@ -56,15 +57,13 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void enterProcess(Message<?> message, StompHeaderAccessor accessor) {
-        String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("destination")).orElse("InvalidRoomId"));
+        String roomId = chatService.getRoomId(Objects.requireNonNull(accessor.getDestination()));
 //        String sessionId = (String) message.getHeaders().get("SessionId");
 
         if (!checkCapacity(roomId)) {
             throw new CustomException(ErrorCode.CHATROOM_CAPACITY_EXCEEDED);
         }
 
-//        chatRoomRepository.setUserEnterInfo(sessionId, roomId);
         chatRoomRepository.plusUserCount(roomId);
 
         String nickname = getNicknameByToken(accessor);
@@ -74,7 +73,10 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private boolean checkCapacity(String roomId) {
+        log.info("checkCapacity() 호출");
         long userCount = chatRoomRepository.getUserCount(roomId);
+        log.info("현재 채팅방 유저수 : {}", userCount);
+
         return userCount < 10;
     }
 
