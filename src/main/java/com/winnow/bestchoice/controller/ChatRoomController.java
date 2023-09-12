@@ -1,5 +1,6 @@
 package com.winnow.bestchoice.controller;
 
+import com.winnow.bestchoice.annotation.LoginMemberId;
 import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
@@ -7,13 +8,10 @@ import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
-import com.winnow.bestchoice.repository.PostRepository;
 import com.winnow.bestchoice.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,8 +30,7 @@ public class ChatRoomController {
      *  채팅방 생성
      */
     @PostMapping("/chat/open/{postId}")
-    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable Long postId, Authentication authentication) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable Long postId, @LoginMemberId long memberId) {
         Post post = postService.findByPostId(postId);
         Long PostMemberId = post.getMember().getId();
 
@@ -67,8 +64,7 @@ public class ChatRoomController {
      * 채팅방 삭제
      */
     @DeleteMapping("/chat/rooms/{roomId}")
-    public ResponseEntity<?> deleteChatRoom(@PathVariable String roomId, Authentication authentication) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public ResponseEntity<?> deleteChatRoom(@PathVariable String roomId, @LoginMemberId long memberId) {
         Long writerId = postService.findByPostId(Long.parseLong(roomId)).getMember().getId();
 
         if (!Objects.equals(memberId, writerId)) {

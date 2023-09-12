@@ -60,12 +60,11 @@ public class PostService {
     private final int MAX_ATTACHMENT_SIZE = 5;
 
 
-    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> imageFiles, List<MultipartFile> videoFiles, Authentication authentication) { // 최적화 - tag 한 번에?
+    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> imageFiles, List<MultipartFile> videoFiles, long memberId) { // 최적화 - tag 한 번에?
         if (!ObjectUtils.isEmpty(imageFiles) && !ObjectUtils.isEmpty(videoFiles) &&
                 imageFiles.size() + videoFiles.size() > MAX_ATTACHMENT_SIZE) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-        long memberId = tokenProvider.getMemberId(authentication);
         Member member = memberRepository.findById(memberId).
                 orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));// 쿼리 최적화
         Post post = postRepository.save(createPostForm.toEntity(member));
@@ -119,8 +118,7 @@ public class PostService {
         }
     }
 
-    public void likePost(Authentication authentication, long postId) { //최적화
-        long memberId = tokenProvider.getMemberId(authentication);
+    public void likePost(long memberId, long postId) { //최적화
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
@@ -136,8 +134,7 @@ public class PostService {
         }
     }
 
-    public void unlikePost(Authentication authentication, long postId) { //최적화
-        long memberId = tokenProvider.getMemberId(authentication);
+    public void unlikePost(long memberId, long postId) { //최적화
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
@@ -151,9 +148,7 @@ public class PostService {
         }
     }
 
-    public void choiceOption(Authentication authentication, long postId, Option choice) {
-        long memberId = tokenProvider.getMemberId(authentication);
-
+    public void choiceOption(long memberId, long postId, Option choice) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
@@ -180,8 +175,7 @@ public class PostService {
         }
     }
 
-    public void reportPost(Authentication authentication, long postId) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    public void reportPost(long memberId, long postId) {
         if (!postRepository.existsByIdAndDeletedFalse(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
@@ -222,8 +216,7 @@ public class PostService {
         }
     }
 
-    public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    public Slice<PostRes> getMyPage(long memberId, int page, int size, MyPageSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<PostSummaryDto> postSlice;
 
@@ -242,8 +235,7 @@ public class PostService {
         return postQueryRepository.getSliceByTag(pageRequest, tag).map(PostRes::of);
     }
 
-    public void deletePost(Authentication authentication, long postId) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    public void deletePost(long memberId, long postId) {
         if (!postQueryRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }

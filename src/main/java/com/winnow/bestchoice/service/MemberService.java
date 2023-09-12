@@ -1,14 +1,12 @@
 package com.winnow.bestchoice.service;
 
 
-import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.response.MemberDetailRes;
 import com.winnow.bestchoice.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -19,7 +17,6 @@ import java.util.Optional;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final TokenProvider tokenProvider;
 
     public Member findById(Long memberId) {
         return memberRepository.findById(memberId)
@@ -44,8 +41,7 @@ public class MemberService {
 
     @Transactional
     // 회원 닉네임 수정
-    public void updateNickname(String nickname, Authentication authentication) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public void updateNickname(String nickname, long memberId) {
         Member findMember = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND)
         );
@@ -63,8 +59,7 @@ public class MemberService {
         return memberRepository.findByNickname(nickname).isPresent();
     }
 
-    public MemberDetailRes getMemberDetail(Authentication authentication) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public MemberDetailRes getMemberDetail(long memberId) {
         Member member = memberRepository.findById(memberId).orElseThrow(
                 () -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
 
