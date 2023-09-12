@@ -36,4 +36,5 @@ public class MemberController {
     public ResponseEntity<MemberDetailRes> getMyInfo(Authentication authentication) {
         return ResponseEntity.ok(memberService.getMemberDetail(authentication));
     }
+    
 }
