@@ -51,8 +51,9 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void checkToken(StompHeaderAccessor accessor) {
+        String sessionId = accessor.getSessionId();
         String jwtToken = getTokenByHeader(accessor);
-        log.info("[CONNECT] token : {}", jwtToken);
+        log.info("[CONNECT] token : {}, sessionId : {}", jwtToken, sessionId);
         tokenProvider.validToken(jwtToken);
     }
 
