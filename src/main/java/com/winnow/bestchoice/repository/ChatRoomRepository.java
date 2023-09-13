@@ -57,9 +57,10 @@ public class ChatRoomRepository {
             Objects.requireNonNull(chatRoom).setUserCount(getUserCount(roomId));
             log.info("가져온 채팅방 : {}", chatRoom);
 
-            ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
-
-            chatRooms.add(chatRoomResponse);
+            if (chatRoom.getUserCount() > 0) {
+                ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
+                chatRooms.add(chatRoomResponse);
+            }
         }
 
 //        chatRooms.sort((o1, o2) -> o2.getCreatedDate().compareTo(o1.getCreatedDate()));
