@@ -122,8 +122,8 @@ public class ChatRoomRepository {
     @Transactional
     public void deleteChatRoom(String roomId) {
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
+        postRepository.deactivateLiveChatById(Long.parseLong(roomId));
         long count = Long.parseLong(Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
         valueOps.decrement(USER_COUNT + "_" + roomId, count - 1);
-        postRepository.deactivateLiveChatById(Long.parseLong(roomId));
     }
 }
