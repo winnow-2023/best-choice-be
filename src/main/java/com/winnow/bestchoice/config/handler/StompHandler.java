@@ -21,6 +21,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -58,6 +59,12 @@ public class StompHandler implements ChannelInterceptor {
     private void checkToken(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         String jwtToken = getTokenByHeader(accessor);
+        Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+
+        Long memberId = tokenProvider.getMemberId(jwtToken);
+        String nickname = memberRepository.findById(memberId).get().getNickname();
+        Objects.requireNonNull(sessionAttributes).put("nickname", nickname);
+
         log.info("[CONNECT] 토큰 : {}, 세션 아이디 : {}", jwtToken, sessionId);
         tokenProvider.validToken(jwtToken);
     }
@@ -101,8 +108,9 @@ public class StompHandler implements ChannelInterceptor {
         chatRoomRepository.minusUserCount(roomId);
 
         log.info("헤더에서 토큰 가져오는 부분 실행!!!");
-        String nickname = Optional.ofNullable((Principal) message.getHeaders().get("simpUser")).map(Principal::getName).orElse("익명의 사용자");
+        String nickname = (String) accessor.getSessionAttributes().get("nickname");
         log.info("닉네임 : {}", nickname);
+
         sendChatMessage(QUIT, roomId, nickname);
         chatRoomRepository.removeUserEnterInfo(sessionId);
 
