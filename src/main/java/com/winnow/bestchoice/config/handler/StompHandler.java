@@ -79,6 +79,7 @@ public class StompHandler implements ChannelInterceptor {
 
         chatRoomRepository.setUserEnterInfo(sessionId, roomId);
         chatRoomRepository.plusUserCount(roomId);
+        long userCount = chatRoomRepository.getUserCount(roomId);
 
         String jwtToken = getTokenByHeader(accessor);
         Long memberId = tokenProvider.getMemberId(jwtToken);
@@ -87,13 +88,13 @@ public class StompHandler implements ChannelInterceptor {
         String nickname = member.getNickname();
         sendChatMessage(ENTER, roomId, nickname);
 
-        log.info("[SUBSCRIBED] 세션 아이디 : {}, 닉네임 : {}, 채팅방 : {}", sessionId, nickname, roomId);
+        log.info("[SUBSCRIBED] 세션 아이디 : {}, 닉네임 : {}, 채팅방 : {}, 유저수 : {}", sessionId, nickname, roomId, userCount);
     }
 
     private boolean checkCapacity(String roomId) {
         log.info("checkCapacity() 호출");
         long userCount = chatRoomRepository.getUserCount(roomId);
-        log.info("현재 채팅방 유저수 : {}", userCount);
+        log.info("입장 전 채팅방 유저수 : {}", userCount);
 
         return userCount < 10;
     }

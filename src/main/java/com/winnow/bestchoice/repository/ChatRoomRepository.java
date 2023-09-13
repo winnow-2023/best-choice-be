@@ -6,6 +6,7 @@ import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import java.util.*;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ChatRoomRepository {
     // Redis CacheKeys
     private static final String CHAT_ROOMS = "CHAT_ROOM"; // 채팅룸 저장
@@ -41,13 +43,16 @@ public class ChatRoomRepository {
 
     // 채팅방 목록 조회
     public List<ChatRoomResponse> findAllChatRoom() {
+        log.info("findAllChatRoom 호출!!!");
         ArrayList<ChatRoomResponse> chatRooms = new ArrayList<>();
         Set<String> roomIds = hashOpsChatRoom.keys(CHAT_ROOMS);
+        log.info("{}", roomIds);
 
         for (String roomId : roomIds) {
             Post post = postRepository.findById(Long.parseLong(roomId)).orElseThrow(
                     () -> new CustomException(ErrorCode.POST_NOT_FOUND));
             ChatRoom chatRoom =  hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+            log.info("가져온 채팅방 : {}", chatRoom);
 
             ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
 
