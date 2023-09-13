@@ -18,7 +18,7 @@ public class ChatRoomPage<T> {
     }
 
     public List<T> getPage(int pageNumber) {
-        if (pageNumber < 1 || pageNumber > getTotalPages()) {
+        if (pageNumber < 0 || pageNumber > getTotalPages()) {
             throw new IllegalArgumentException("유효하지 않은 페이지 번호입니다.");
         }
 
