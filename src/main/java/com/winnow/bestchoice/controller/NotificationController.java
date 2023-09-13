@@ -35,6 +35,11 @@ public class NotificationController {
         return ResponseEntity.ok(notificationService.getNotifications(memberId, page, size));
     }
 
+    @GetMapping("api/notifications/{notificationId}")
+    public ResponseEntity<?> getNotificationDetail(@LoginMemberId long memberId, @PathVariable long notificationId) {
+        return ResponseEntity.ok(notificationService.getNotificationDetail(notificationId));
+    }
+
     @DeleteMapping("api/notifications/{notificationId}")
     public ResponseEntity<?> deleteNotification(@LoginMemberId long memberId, @PathVariable long notificationId) {
         notificationService.deleteNotification(memberId, notificationId);

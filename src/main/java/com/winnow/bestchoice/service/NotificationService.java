@@ -6,7 +6,9 @@ import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.CreatingRoomNotificationData;
+import com.winnow.bestchoice.model.response.NotificationDetailRes;
 import com.winnow.bestchoice.model.response.NotificationRes;
+import com.winnow.bestchoice.repository.ChatRoomRepository;
 import com.winnow.bestchoice.repository.EmitterRepository;
 import com.winnow.bestchoice.repository.NotificationRepository;
 import com.winnow.bestchoice.repository.PostQueryRepository;
@@ -33,6 +35,7 @@ public class NotificationService {
     private final PostQueryRepository postQueryRepository;
     private final EmitterRepository emitterRepository;
     private final NotificationRepository notificationRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final String EVENT_CONNECT = "connect";
     private final String EVENT_NOTIFICATION = "notification";
 
@@ -119,5 +122,24 @@ public class NotificationService {
     @Transactional
     public void deleteAllNotifications(long memberId) {
         notificationRepository.deleteAllByMemberId(memberId);
+    }
+
+    @Transactional
+    public NotificationDetailRes getNotificationDetail(long notificationId) {
+        Notification notification = notificationRepository.findWithPostById(notificationId)
+                .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
+
+        Post post = notification.getPost();
+        if (post.isDeleted()) {
+            throw new CustomException(ErrorCode.POST_NOT_FOUND);
+        }
+        long liveChatUserCount = 0;
+        if (post.isLiveChatActive()) {
+            liveChatUserCount = chatRoomRepository.getUserCount(String.valueOf(post.getId()));
+        }
+        if (!notification.isChecked()) {
+            notification.setChecked(true);
+        }
+        return NotificationDetailRes.of(post, liveChatUserCount);
     }
 }
