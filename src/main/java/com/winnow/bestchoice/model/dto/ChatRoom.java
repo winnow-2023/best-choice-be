@@ -17,7 +17,7 @@ import java.util.UUID;
 public class ChatRoom implements Serializable {
 
     private static final long serialVersionUID = 6494678977089006639L;
-    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM-dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
     private String roomId;
     private long userCount; // 채팅방 인원수
     private String createdDate;
