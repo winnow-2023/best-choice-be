@@ -50,7 +50,9 @@ public class NotificationService {
         List<Notification> notifications = new ArrayList<>();
 
         for (Long memberId : memberIds) {
-            notifications.add(Notification.builder().post(post).member(new Member(memberId)).build());
+            notifications.add(Notification.builder().post(post)
+                    .member(new Member(memberId))
+                    .postTitle(post.getTitle()).build());
             notify(memberId, data);
         }
         notificationRepository.saveAll(notifications);
