@@ -18,7 +18,7 @@ public class ChatService {
     private final RedisTemplate redisTemplate;
     private final ChatRoomRepository chatRoomRepository;
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-dd-MM HH:mm:ss");
+    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     /**
      * destination정보에서 roomId 추출
