@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class ChatService {
     private final RedisTemplate redisTemplate;
     private final ChatRoomRepository chatRoomRepository;
 
-    private final SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd HH:mm:ss");
+    private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
     /**
      * destination정보에서 roomId 추출
@@ -36,7 +37,7 @@ public class ChatService {
      */
     public void sendChatMessage(ChatMessage chatMessage) {
         chatMessage.setUserCount(chatRoomRepository.getUserCount(chatMessage.getRoomId()));
-        chatMessage.setSendTime(sdf.format(new Date().getTime()));
+        chatMessage.setSendTime(LocalDateTime.now().format(FORMATTER));
 
         if (ChatMessage.MessageType.ENTER.equals(chatMessage.getType())) {
             chatMessage.setMessage(chatMessage.getSender() + "님이 방에 입장했습니다.");
