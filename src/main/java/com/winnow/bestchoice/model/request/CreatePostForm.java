@@ -5,6 +5,7 @@ import com.winnow.bestchoice.entity.Post;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.util.ObjectUtils;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -16,7 +17,6 @@ public class CreatePostForm {
 
     @NotBlank
     private String title;
-    @NotBlank
     private String content;
     @NotBlank
     private String optionA;
@@ -26,6 +26,9 @@ public class CreatePostForm {
     private List<String> tags;
 
     public Post toEntity(Member member) {
+        if (ObjectUtils.isEmpty(this.content)) {
+            this.content = "";
+        }
         return Post.builder()
                 .member(member)
                 .title(this.title)
