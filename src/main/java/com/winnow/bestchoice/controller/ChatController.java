@@ -28,7 +28,6 @@ public class ChatController {
         String nickname = message.getSender();
         message.setSender(nickname);
         message.setUserCount(chatRoomRepository.getUserCount(message.getRoomId()));
-        message.setSendTime(LocalDateTime.now());
 
         chatService.sendChatMessage(message);
     }
