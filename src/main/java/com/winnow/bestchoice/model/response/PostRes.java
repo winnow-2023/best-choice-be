@@ -22,7 +22,7 @@ public class PostRes {
     private long likeCount;
     private long choiceCount;
     private long commentCount;
-    private boolean chattingActive;
+    private boolean liveChatActive;
 
     public static PostRes of(PostSummaryDto dto) {
         return PostRes.builder()
@@ -37,6 +37,7 @@ public class PostRes {
                 .likeCount(dto.getLikeCount())
                 .choiceCount(dto.getACount() + dto.getBCount())
                 .commentCount(dto.getCommentCount())
+                .liveChatActive(dto.isLiveChatActive())
                 .build();
     }
 }

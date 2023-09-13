@@ -11,17 +11,19 @@ import java.time.LocalDateTime;
 @Builder
 public class NotificationRes {
 
-    private long id;
+    private long notificationId;
     private long postId;
+    private String postTitle;
     private boolean checked;
-    private LocalDateTime createDate;
+    private LocalDateTime createdDate;
 
     public static NotificationRes of(Notification notification) {
         return NotificationRes.builder()
-                .id(notification.getId())
+                .notificationId(notification.getId())
                 .postId(notification.getPost().getId())
+                .postTitle(notification.getPostTitle())
                 .checked(notification.isChecked())
-                .createDate(notification.getCreatedDate())
+                .createdDate(notification.getCreatedDate())
                 .build();
     }
 }

@@ -25,7 +25,7 @@ public class NotificationController {
     @PostMapping("/send-data/{postId}")
     public void sendData(@PathVariable Long postId) {//todo test용 추후 삭제 필수
         Post post = postService.findByPostId(postId);
-        notificationService.notifyCreatingRoomByPostId(post);
+        notificationService.notifyCreatingRoomByPost(post);
     }
 
     @GetMapping("api/notifications")
