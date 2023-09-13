@@ -23,7 +23,7 @@ public class ChatRoomResponse{
     private long userCount;
 
     public static ChatRoomResponse fromEntity(Post post, ChatRoom chatRoom) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM-dd HH:mm:ss");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
         return ChatRoomResponse.builder()
                 .postId(post.getId())
