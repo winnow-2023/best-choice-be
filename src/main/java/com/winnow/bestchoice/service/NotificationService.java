@@ -125,11 +125,14 @@ public class NotificationService {
     }
 
     @Transactional
-    public NotificationDetailRes getNotificationDetail(long notificationId) {
+    public NotificationDetailRes getNotificationDetail(long memberId, long notificationId) {
         Notification notification = notificationRepository.findWithPostById(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
-
         Post post = notification.getPost();
+
+        if (notification.getMember().getId() != memberId) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
         if (post.isDeleted()) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
