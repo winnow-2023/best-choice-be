@@ -5,6 +5,7 @@ import com.winnow.bestchoice.model.dto.ChatRoom;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Builder
@@ -18,6 +19,7 @@ public class ChatRoomResponse{
     private long commentCount;
     private String nickname;
     private String createdDate;
+    private LocalDateTime chatRoomCreatedDate;
     private long userCount;
 
     public static ChatRoomResponse fromEntity(Post post, ChatRoom chatRoom) {
@@ -32,6 +34,7 @@ public class ChatRoomResponse{
                 .commentCount(post.getCommentCount())
                 .nickname(post.getMember().getNickname())
                 .createdDate(post.getCreatedDate().format(formatter))
+                .chatRoomCreatedDate(LocalDateTime.parse(chatRoom.getCreatedDate(), formatter))
                 .userCount(chatRoom.getUserCount())
                 .build();
     }
