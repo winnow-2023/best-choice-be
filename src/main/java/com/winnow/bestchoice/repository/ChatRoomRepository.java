@@ -4,23 +4,14 @@ import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
-import com.winnow.bestchoice.model.dto.ChatRoomPage;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
-import com.winnow.bestchoice.service.RedisSubscriber;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
-import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.listener.ChannelTopic;
-import org.springframework.data.redis.listener.RedisMessageListenerContainer;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -48,7 +39,7 @@ public class ChatRoomRepository {
     }
 
     // 채팅방 목록 조회
-    public ChatRoomPage<List<ChatRoomResponse>> findAllChatRoom(int pageNumber, int pageSize) {
+    public List<ChatRoomResponse> findAllChatRoom() {
         ArrayList<ChatRoomResponse> chatRooms = new ArrayList<>();
         Set<String> roomIds = hashOpsChatRoom.keys(CHAT_ROOMS);
 
@@ -62,10 +53,8 @@ public class ChatRoomRepository {
             chatRooms.add(chatRoomResponse);
         }
 
-        chatRooms.sort((o1, o2) -> o2.getCreatedDate().compareTo(o1.getCreatedDate()));
-        ChatRoomPage<?> chatRoomPage = new ChatRoomPage<>(chatRooms, pageSize);
-
-        return (ChatRoomPage<List<ChatRoomResponse>>) chatRoomPage.getPage(pageNumber);
+//        chatRooms.sort((o1, o2) -> o2.getCreatedDate().compareTo(o1.getCreatedDate()));
+        return chatRooms;
     }
 
     // 채팅방 생성
@@ -74,6 +63,7 @@ public class ChatRoomRepository {
         hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom);
         return chatRoom;
     }
+
 
     // 유저가 입장한 채팅방ID와 유저 세션ID 맵핑 정보 저장
     public void setUserEnterInfo(String sessionId, String roomId) {
@@ -90,7 +80,6 @@ public class ChatRoomRepository {
         hashOpsEnterInfo.delete(ENTER_INFO, sessionId);
     }
 
-
     // 채팅방 유저수 조회
     public long getUserCount(String roomId) {
         return Long.parseLong( Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
@@ -98,11 +87,19 @@ public class ChatRoomRepository {
 
     // 채팅방에 입장한 유저수 +1
     public long plusUserCount(String roomId) {
+        ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+        long userCount = chatRoom.getUserCount();
+        chatRoom.setUserCount(userCount + 1);
+
         return Optional.ofNullable(valueOps.increment(USER_COUNT + "_" + roomId)).orElse(0L);
     }
 
     // 채팅방에 입장한 유저수 -1
     public long minusUserCount(String roomId) {
+        ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+        long userCount = chatRoom.getUserCount();
+        chatRoom.setUserCount(userCount -1);
+
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId))
                 .filter(count -> count > 0).orElse(0L);
     }
