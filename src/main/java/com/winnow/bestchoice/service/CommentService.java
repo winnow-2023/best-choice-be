@@ -7,7 +7,6 @@ import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
-import com.winnow.bestchoice.model.dto.CommentDto;
 import com.winnow.bestchoice.model.request.CreateCommentForm;
 import com.winnow.bestchoice.model.response.CommentRes;
 import com.winnow.bestchoice.repository.*;
