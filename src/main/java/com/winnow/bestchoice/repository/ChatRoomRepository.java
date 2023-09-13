@@ -8,6 +8,7 @@ import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,7 @@ public class ChatRoomRepository {
         for (String roomId : roomIds) {
             Post post = getPostByRoomId(roomId);
 
-            ChatRoom chatRoom =  hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+            ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
             Objects.requireNonNull(chatRoom).setUserCount(getUserCount(roomId));
             log.info("가져온 채팅방 : {}", chatRoom);
 
@@ -104,7 +105,7 @@ public class ChatRoomRepository {
 
     // 채팅방 유저수 조회
     public long getUserCount(String roomId) {
-        return Long.parseLong( Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
+        return Long.parseLong(Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
     }
 
     // 채팅방에 입장한 유저수 +1
@@ -122,7 +123,8 @@ public class ChatRoomRepository {
     @Transactional
     public void deleteChatRoom(String roomId) {
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
-        valueOps.decrement(USER_COUNT + "_" + roomId, getUserCount(roomId));
+        long count = Long.parseLong(Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
+        valueOps.decrement(USER_COUNT + "_" + roomId, count - 1);
         postRepository.deactivateLiveChatById(Long.parseLong(roomId));
     }
 
