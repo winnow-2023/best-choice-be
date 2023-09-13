@@ -45,7 +45,7 @@ public class NotificationService {
 
     @Async("notificationExecutor")
     public void notifyCreatingRoomByPost(Post post) {
-        HashSet<Long> memberIds = getRelatedMemberIds(post.getId());
+        HashSet<Long> memberIds = getRelatedMemberIds(post);
         CreatingRoomNotificationData data = CreatingRoomNotificationData.of(post);
         List<Notification> notifications = new ArrayList<>();
 
@@ -56,7 +56,8 @@ public class NotificationService {
         notificationRepository.saveAll(notifications);
     }
 
-    private HashSet<Long> getRelatedMemberIds(long postId) {
+    private HashSet<Long> getRelatedMemberIds(Post post) {
+        long postId = post.getId();
         List<Long> memberIdByLike = postQueryRepository.findMemberIdRelatedWithLikeByPostId(postId);
         List<Long> memberIdByChoice = postQueryRepository.findMemberIdRelatedWithChoiceByPostId(postId);
         List<Long> memberIdByComment = postQueryRepository.findMemberIdRelatedWithCommentByPostId(postId);
@@ -65,6 +66,7 @@ public class NotificationService {
         memberIds.addAll(memberIdByLike);
         memberIds.addAll(memberIdByChoice);
         memberIds.addAll(memberIdByComment);
+        memberIds.remove(post.getMember().getId()); //게시글 작성자는 제외
 
         return memberIds;
     }
