@@ -73,7 +73,7 @@ public class PostQueryRepository {
         return Optional.ofNullable(jpaQueryFactory.select(Projections.bean(PostDetailDto.class,
                         post.id, member.id.as("memberId"), member.nickname
                         , post.title, post.content, post.optionA, post.optionB, post.tags
-                        , post.createdDate, post.popularityDate
+                        , post.createdDate, post.popularityDate, post.liveChatActive
                         , post.likeCount, post.ACount, post.BCount, post.commentCount))
                 .from(post).join(post.member, member)
                 .where(post.id.eq(postId))
@@ -86,7 +86,7 @@ public class PostQueryRepository {
                         post.id, member.id.as("memberId"), member.nickname
                         , choice.choices.as("myChoice"), postLike.isNotNull().as("liked"), report.isNotNull().as("reported")
                         , post.title, post.content, post.optionA, post.optionB, post.tags
-                        , post.createdDate, post.popularityDate
+                        , post.createdDate, post.popularityDate, post.liveChatActive
                         , post.likeCount, post.ACount, post.BCount, post.commentCount))
                 .from(post).join(post.member, member)
                 .leftJoin(choice).on(choice.post.eq(post), choice.member.id.eq(memberId))
@@ -200,8 +200,8 @@ public class PostQueryRepository {
         return jpaQueryFactory.select(Projections.bean(PostSummaryDto.class,
                         post.id, member.id.as("memberId"), member.nickname
                         , post.title, post.optionA, post.optionB, post.tags
-                        , post.createdDate, post.popularityDate, post.likeCount
-                        , post.ACount, post.BCount, post.commentCount))
+                        , post.createdDate, post.popularityDate, post.liveChatActive
+                        , post.likeCount, post.ACount, post.BCount, post.commentCount))
                 .from(post).join(post.member, member)
                 .where(post.deleted.eq(false));
     }

@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.time.Duration;
@@ -64,9 +65,12 @@ public class ChatRoomRepository {
     }
 
     // 채팅방 생성
-    public ChatRoom createChatRoom(String roomId) {
+    @Transactional
+    public ChatRoom createChatRoom(long postId) {
+        String roomId = String.valueOf(postId);
         ChatRoom chatRoom = ChatRoom.create(roomId);
         hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom);
+        postRepository.activateLiveChatById(postId);
         return chatRoom;
     }
 
@@ -111,9 +115,11 @@ public class ChatRoomRepository {
     }
 
     // 채팅방 삭제
+    @Transactional
     public void deleteChatRoom(String roomId) {
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
         valueOps.set(USER_COUNT + "_" + roomId, String.valueOf(0L), Duration.ofSeconds(5));
+        postRepository.deactivateLiveChatById(Long.parseLong(roomId));
     }
 
 }

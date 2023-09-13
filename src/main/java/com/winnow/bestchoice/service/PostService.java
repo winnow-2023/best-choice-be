@@ -47,6 +47,7 @@ public class PostService {
     private final ChoiceRepository choiceRepository;
     private final AttachmentRepository attachmentRepository;
     private final ReportRepository reportRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final AmazonS3Client amazonS3Client;
     private final TokenProvider tokenProvider;
     @Value("${cloud.aws.s3.bucket}")
@@ -203,6 +204,10 @@ public class PostService {
 
         PostDetailDto postDetailDto = postDetailDtoOptional
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
+        if (postDetailDto.isLiveChatActive()) {
+            postDetailDto.setLiveChatUserCount(chatRoomRepository.getUserCount(String.valueOf(postId)));
+        }
 
         return PostDetailRes.of(postDetailDto, attachmentRepository.findUrlsByPostId(postId));
     }

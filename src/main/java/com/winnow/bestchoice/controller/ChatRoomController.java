@@ -8,6 +8,8 @@ import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
+import com.winnow.bestchoice.repository.PostRepository;
+import com.winnow.bestchoice.service.NotificationService;
 import com.winnow.bestchoice.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,18 +25,22 @@ import java.util.Objects;
 public class ChatRoomController {
 
     private final ChatRoomRepository chatRoomRepository;
+    private final NotificationService notificationService;
     private final PostService postService;
+    private final PostRepository postRepository;
 
     /**
      *  채팅방 생성
      */
     @PostMapping("/chat/open/{postId}")
-    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable Long postId, @LoginMemberId long memberId) {
+    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable long postId, @LoginMemberId long memberId) {
         Post post = postService.findByPostId(postId);
         Long PostMemberId = post.getMember().getId();
 
         validateRequest(memberId, PostMemberId, post);
-        ChatRoom chatRoom = chatRoomRepository.createChatRoom(String.valueOf(postId));
+        ChatRoom chatRoom = chatRoomRepository.createChatRoom(postId);
+
+        notificationService.notifyCreatingRoomByPost(post); //채팅방 생성시 해당 게시글 관련 유저들에게 비동기 알림
 
         return ResponseEntity.ok().body(chatRoom);
     }
