@@ -52,7 +52,9 @@ public class ChatRoomRepository {
         for (String roomId : roomIds) {
             Post post = postRepository.findById(Long.parseLong(roomId)).orElseThrow(
                     () -> new CustomException(ErrorCode.POST_NOT_FOUND));
+
             ChatRoom chatRoom =  hashOpsChatRoom.get(CHAT_ROOMS, roomId);
+            Objects.requireNonNull(chatRoom).setUserCount(getUserCount(roomId));
             log.info("가져온 채팅방 : {}", chatRoom);
 
             ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
@@ -97,19 +99,11 @@ public class ChatRoomRepository {
 
     // 채팅방에 입장한 유저수 +1
     public long plusUserCount(String roomId) {
-        ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
-        long userCount = Objects.requireNonNull(chatRoom).getUserCount();
-        chatRoom.setUserCount(userCount + 1);
-
         return Optional.ofNullable(valueOps.increment(USER_COUNT + "_" + roomId)).orElse(0L);
     }
 
     // 채팅방에 입장한 유저수 -1
     public long minusUserCount(String roomId) {
-        ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
-        long userCount = Objects.requireNonNull(chatRoom).getUserCount();
-        chatRoom.setUserCount(userCount -1);
-
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId))
                 .filter(count -> count > 0).orElse(0L);
     }
