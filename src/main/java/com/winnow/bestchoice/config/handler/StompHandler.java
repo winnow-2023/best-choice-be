@@ -19,6 +19,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -100,11 +101,8 @@ public class StompHandler implements ChannelInterceptor {
         chatRoomRepository.minusUserCount(roomId);
 
         log.info("헤더에서 토큰 가져오는 부분 실행!!!");
-        String jwtToken = getTokenByHeader(accessor);
-        Long memberId = tokenProvider.getMemberId(jwtToken);
-        Member member = memberRepository.findById(memberId).get();
-
-        String nickname = member.getNickname();
+        String nickname = Optional.ofNullable((Principal) message.getHeaders().get("simpUser")).map(Principal::getName).orElse("익명의 사용자");
+        log.info("닉네임 : {}", nickname);
         sendChatMessage(QUIT, roomId, nickname);
         chatRoomRepository.removeUserEnterInfo(sessionId);
 
