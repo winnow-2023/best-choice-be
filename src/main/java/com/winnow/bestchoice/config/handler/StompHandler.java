@@ -112,7 +112,6 @@ public class StompHandler implements ChannelInterceptor {
                 .type(type)
                 .roomId(roomId)
                 .sender(nickname)
-                .sendTime(LocalDateTime.now())
                 .build());
     }
 
