@@ -84,6 +84,7 @@ public class ChatRoomRepository {
         ChatRoom chatRoom = ChatRoom.create(roomId);
         hashOpsChatRoom.put(CHAT_ROOMS, roomId, chatRoom);
         postRepository.activateLiveChatById(postId);
+        valueOps.set(USER_COUNT + "_" + roomId, "0"); //test
         return chatRoom;
     }
 
@@ -123,9 +124,8 @@ public class ChatRoomRepository {
     @Transactional
     public void deleteChatRoom(String roomId) {
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
-        long count = Long.parseLong(Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
-        valueOps.decrement(USER_COUNT + "_" + roomId, count - 1);
+//        long count = Long.parseLong(Optional.ofNullable(valueOps.get(USER_COUNT + "_" + roomId)).orElse("0"));
+//        valueOps.decrement(USER_COUNT + "_" + roomId, count - 1);
         postRepository.deactivateLiveChatById(Long.parseLong(roomId));
     }
-
 }
