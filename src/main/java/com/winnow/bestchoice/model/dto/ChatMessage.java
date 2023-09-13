@@ -2,6 +2,8 @@ package com.winnow.bestchoice.model.dto;
 
 import lombok.*;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,4 +21,5 @@ public class ChatMessage {
     private String sender;
     private String message;
     private long userCount;
+    private LocalDateTime sendTime;
 }

@@ -19,6 +19,7 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -56,18 +57,19 @@ public class StompHandler implements ChannelInterceptor {
     private void checkToken(StompHeaderAccessor accessor) {
         String sessionId = accessor.getSessionId();
         String jwtToken = getTokenByHeader(accessor);
-        log.info("[CONNECT] token : {}, sessionId : {}", jwtToken, sessionId);
+        log.info("[CONNECT] 토큰 : {}, 세션 아이디 : {}", jwtToken, sessionId);
         tokenProvider.validToken(jwtToken);
     }
 
     private void enterProcess(Message<?> message, StompHeaderAccessor accessor) {
         String roomId = chatService.getRoomId(Objects.requireNonNull(accessor.getDestination()));
-//        String sessionId = (String) message.getHeaders().get("SessionId");
+        String sessionId = accessor.getSessionId();
 
         if (!checkCapacity(roomId)) {
             throw new CustomException(ErrorCode.CHATROOM_CAPACITY_EXCEEDED);
         }
 
+        chatRoomRepository.setUserEnterInfo(sessionId, roomId);
         chatRoomRepository.plusUserCount(roomId);
 
         String jwtToken = getTokenByHeader(accessor);
@@ -77,7 +79,7 @@ public class StompHandler implements ChannelInterceptor {
         String nickname = member.getNickname();
         sendChatMessage(ENTER, roomId, nickname);
 
-        log.info("[SUBSCRIBED] 닉네임 : {}, 채팅방 : {}", nickname, roomId);
+        log.info("[SUBSCRIBED] 세션 아이디 : {}, 닉네임 : {}, 채팅방 : {}", sessionId, nickname, roomId);
     }
 
     private boolean checkCapacity(String roomId) {
@@ -89,9 +91,8 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void disconnectProcess(Message<?> message, StompHeaderAccessor accessor) {
-//        String sessionId = (String) message.getHeaders().get("simpSessionId");
-        String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("destination")).orElse("InvalidRoomId"));
+        String sessionId = accessor.getSessionId();
+        String roomId = chatRoomRepository.getUserEnterRoomId(sessionId);
 
         chatRoomRepository.minusUserCount(roomId);
 
@@ -101,20 +102,19 @@ public class StompHandler implements ChannelInterceptor {
 
         String nickname = member.getNickname();
         sendChatMessage(QUIT, roomId, nickname);
-//        chatRoomRepository.removeUserEnterInfo(sessionId);
+        chatRoomRepository.removeUserEnterInfo(sessionId);
 
-        log.info("[DISCONNECTED] roomId : {}", roomId);
+        log.info("[DISCONNECTED] 세션 아이디: {}, 채팅방 : {}", sessionId, roomId);
     }
-
 
     private void sendChatMessage(ChatMessage.MessageType type, String roomId, String nickname) {
         chatService.sendChatMessage(ChatMessage.builder()
                 .type(type)
                 .roomId(roomId)
                 .sender(nickname)
+                .sendTime(LocalDateTime.now())
                 .build());
     }
-
 
     private static String getTokenByHeader(StompHeaderAccessor accessor) {
         return accessor.getFirstNativeHeader("token");
