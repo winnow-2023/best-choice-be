@@ -44,27 +44,36 @@ public class ChatRoomRepository {
 
     // 채팅방 목록 조회
     public List<ChatRoomResponse> findAllChatRoom() {
-        log.info("findAllChatRoom 호출!!!");
+        log.info("findAllChatRoom() 호출");
         ArrayList<ChatRoomResponse> chatRooms = new ArrayList<>();
         Set<String> roomIds = hashOpsChatRoom.keys(CHAT_ROOMS);
         log.info("{}", roomIds);
 
         for (String roomId : roomIds) {
-            Post post = postRepository.findById(Long.parseLong(roomId)).orElseThrow(
-                    () -> new CustomException(ErrorCode.POST_NOT_FOUND));
+            Post post = getPostByRoomId(roomId);
 
             ChatRoom chatRoom =  hashOpsChatRoom.get(CHAT_ROOMS, roomId);
             Objects.requireNonNull(chatRoom).setUserCount(getUserCount(roomId));
             log.info("가져온 채팅방 : {}", chatRoom);
 
-            if (chatRoom.getUserCount() > 0) {
-                ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
-                chatRooms.add(chatRoomResponse);
-            }
+            CheckingUserCount(chatRoom, post, chatRooms);
         }
-
-//        chatRooms.sort((o1, o2) -> o2.getCreatedDate().compareTo(o1.getCreatedDate()));
+        chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getChatRoomCreatedDate()));
         return chatRooms;
+    }
+
+    private Post getPostByRoomId(String roomId) {
+        Post post = postRepository.findById(Long.parseLong(roomId)).orElseThrow(
+                () -> new CustomException(ErrorCode.POST_NOT_FOUND));
+        return post;
+    }
+
+
+    private static void CheckingUserCount(ChatRoom chatRoom, Post post, ArrayList<ChatRoomResponse> chatRooms) {
+        if (chatRoom.getUserCount() > 0) {
+            ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
+            chatRooms.add(chatRoomResponse);
+        }
     }
 
     // 채팅방 생성
