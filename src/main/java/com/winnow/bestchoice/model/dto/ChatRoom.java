@@ -2,6 +2,7 @@ package com.winnow.bestchoice.model.dto;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -11,6 +12,7 @@ import java.util.UUID;
 
 @Getter
 @Setter
+@ToString
 public class ChatRoom implements Serializable {
 
     private static final long serialVersionUID = 6494678977089006639L;

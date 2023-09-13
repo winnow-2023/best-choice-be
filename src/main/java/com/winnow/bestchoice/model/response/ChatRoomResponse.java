@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 @Getter
 public class ChatRoomResponse{
+    private Long postId;
     private String title;
     private String optionA;
     private String optionB;
@@ -23,6 +24,7 @@ public class ChatRoomResponse{
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM-dd HH:mm:ss");
 
         return ChatRoomResponse.builder()
+                .postId(post.getId())
                 .title(post.getTitle())
                 .optionA(post.getOptionA())
                 .optionB(post.getOptionB())
