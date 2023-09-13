@@ -58,11 +58,8 @@ public class ChatRoomController {
      * 채팅방 리스트
      */
     @GetMapping("/chat/rooms")
-    public ResponseEntity<List<ChatRoomResponse>> findAllChatRoom(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size)
-    {
-        return ResponseEntity.ok().body((List<ChatRoomResponse>) chatRoomRepository.findAllChatRoom(page, size));
+    public ResponseEntity<List<ChatRoomResponse>> findAllChatRoom() {
+        return ResponseEntity.ok().body(chatRoomRepository.findAllChatRoom());
     }
 
     /**
