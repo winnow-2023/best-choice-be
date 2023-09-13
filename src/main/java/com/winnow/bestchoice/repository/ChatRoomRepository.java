@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.Duration;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -88,7 +89,7 @@ public class ChatRoomRepository {
     // 채팅방에 입장한 유저수 +1
     public long plusUserCount(String roomId) {
         ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
-        long userCount = chatRoom.getUserCount();
+        long userCount = Objects.requireNonNull(chatRoom).getUserCount();
         chatRoom.setUserCount(userCount + 1);
 
         return Optional.ofNullable(valueOps.increment(USER_COUNT + "_" + roomId)).orElse(0L);
@@ -97,7 +98,7 @@ public class ChatRoomRepository {
     // 채팅방에 입장한 유저수 -1
     public long minusUserCount(String roomId) {
         ChatRoom chatRoom = hashOpsChatRoom.get(CHAT_ROOMS, roomId);
-        long userCount = chatRoom.getUserCount();
+        long userCount = Objects.requireNonNull(chatRoom).getUserCount();
         chatRoom.setUserCount(userCount -1);
 
         return Optional.ofNullable(valueOps.decrement(USER_COUNT + "_" + roomId))
@@ -107,7 +108,7 @@ public class ChatRoomRepository {
     // 채팅방 삭제
     public void deleteChatRoom(String roomId) {
         hashOpsChatRoom.delete(CHAT_ROOMS, roomId);
-        valueOps.getAndDelete(USER_COUNT + "_" + roomId);
+        valueOps.set(USER_COUNT + "_" + roomId, String.valueOf(0L), Duration.ofSeconds(5));
     }
 
 }
