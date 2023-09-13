@@ -33,6 +33,14 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     @Query("update Post p set p.commentCount=p.commentCount-1 where p.id=:id")
     void minusCommentCountById(long id);
 
+    @Modifying
+    @Query("update Post p set p.liveChatActive=true where p.id=:id")
+    void activateLiveChatById(long id);
+
+    @Modifying
+    @Query("update Post p set p.liveChatActive=false where p.id=:id")
+    void deactivateLiveChatById(long id);
+
     Optional<Post> findByIdAndDeletedFalse(long postId);
 
     boolean existsByIdAndDeletedFalse(long postId);

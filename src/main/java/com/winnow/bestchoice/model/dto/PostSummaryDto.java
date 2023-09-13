@@ -22,4 +22,5 @@ public class PostSummaryDto {
     private long ACount;
     private long BCount;
     private long commentCount;
+    private boolean liveChatActive;
 }

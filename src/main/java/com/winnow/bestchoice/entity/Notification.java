@@ -26,6 +26,9 @@ public class Notification {
     @JoinColumn(name = "post_id")
     private Post post;
 
+    @Column(name = "post_title")
+    private String postTitle;
+
     @Column(name = "checked")
     private boolean checked;
 
