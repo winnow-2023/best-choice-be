@@ -44,7 +44,7 @@ public class NotificationService {
     }
 
     @Async("notificationExecutor")
-    public void notifyCreatingRoomByPostId(Post post) {
+    public void notifyCreatingRoomByPost(Post post) {
         HashSet<Long> memberIds = getRelatedMemberIds(post.getId());
         CreatingRoomNotificationData data = CreatingRoomNotificationData.of(post);
         List<Notification> notifications = new ArrayList<>();
@@ -81,7 +81,7 @@ public class NotificationService {
         }
     }
 
-    public void notify(long userId, Object event) {
+    private void notify(long userId, Object event) {
         sendToClient(userId, EVENT_NOTIFICATION, event);
     }
 
