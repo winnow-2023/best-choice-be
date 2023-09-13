@@ -91,11 +91,15 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void disconnectProcess(Message<?> message, StompHeaderAccessor accessor) {
+        log.info("disconnectProcess() 호출!!!");
         String sessionId = accessor.getSessionId();
         String roomId = chatRoomRepository.getUserEnterRoomId(sessionId);
+        log.info("세션 아이디 : {}, 채팅방 : {}", sessionId, roomId);
 
+        log.info("minusUserCount()가 호출되었음!!!");
         chatRoomRepository.minusUserCount(roomId);
 
+        log.info("헤더에서 토큰 가져오는 부분 실행!!!");
         String jwtToken = getTokenByHeader(accessor);
         Long memberId = tokenProvider.getMemberId(jwtToken);
         Member member = memberRepository.findById(memberId).get();
