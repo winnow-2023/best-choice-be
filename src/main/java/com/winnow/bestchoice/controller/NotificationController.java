@@ -28,7 +28,7 @@ public class NotificationController {
         notificationService.notifyCreatingRoomByPost(post);
     }
 
-    @GetMapping("api/notifications")
+    @GetMapping("api/notifications/all")
     public ResponseEntity<?> getNotifications(@LoginMemberId long memberId,
                                               @RequestParam(defaultValue = "0") int page,
                                               @RequestParam(defaultValue = "10") int size) {
