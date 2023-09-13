@@ -25,4 +25,7 @@ public class ChatMessage {
     private String sender;
     private String message;
     private long userCount;
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDateTime sendTime;
 }
