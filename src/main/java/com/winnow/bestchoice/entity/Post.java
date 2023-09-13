@@ -63,6 +63,9 @@ public class Post {
     @Column(name = "deleted")
     private boolean deleted;
 
+    @Column(name = "liveChatActive")
+    private boolean liveChatActive;
+
     public Post(Long id) {this.id = id;}
 
 }
