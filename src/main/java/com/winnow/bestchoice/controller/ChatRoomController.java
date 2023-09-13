@@ -33,14 +33,13 @@ public class ChatRoomController {
      *  채팅방 생성
      */
     @PostMapping("/chat/open/{postId}")
-    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable Long postId, @LoginMemberId long memberId) {
+    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable long postId, @LoginMemberId long memberId) {
         Post post = postService.findByPostId(postId);
         Long PostMemberId = post.getMember().getId();
 
         validateRequest(memberId, PostMemberId, post);
-        ChatRoom chatRoom = chatRoomRepository.createChatRoom(String.valueOf(postId));
+        ChatRoom chatRoom = chatRoomRepository.createChatRoom(postId);
 
-        postRepository.activateLiveChatById(postId);
         notificationService.notifyCreatingRoomByPost(post); //채팅방 생성시 해당 게시글 관련 유저들에게 비동기 알림
 
         return ResponseEntity.ok().body(chatRoom);
@@ -71,14 +70,12 @@ public class ChatRoomController {
      */
     @DeleteMapping("/chat/rooms/{roomId}")
     public ResponseEntity<?> deleteChatRoom(@PathVariable String roomId, @LoginMemberId long memberId) {
-        long postId = Long.parseLong(roomId);
-        Long writerId = postService.findByPostId(postId).getMember().getId();
+        Long writerId = postService.findByPostId(Long.parseLong(roomId)).getMember().getId();
 
         if (!Objects.equals(memberId, writerId)) {
             throw new CustomException(ErrorCode.POST_MEMBER_ID_MISS_MATCH);
         }
         chatRoomRepository.deleteChatRoom(roomId);
-        postRepository.deactivateLiveChatById(postId);
 
         return ResponseEntity.ok().build();
     }

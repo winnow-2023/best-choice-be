@@ -29,4 +29,5 @@ public class PostDetailDto {
     private long BCount;
     private long commentCount;
     private boolean liveChatActive;
+    private long liveChatUserCount;
 }

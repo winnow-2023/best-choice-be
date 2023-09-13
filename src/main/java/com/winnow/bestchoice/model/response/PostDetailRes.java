@@ -32,7 +32,7 @@ public class PostDetailRes {
     private long likeCount;
     private long commentCount;
     private boolean liveChatActive;
-    private int liveChatUserCount;
+    private long liveChatUserCount;
 
     public static PostDetailRes of(Post post, List<String> resources) {
         return PostDetailRes.builder()
@@ -73,6 +73,7 @@ public class PostDetailRes {
                 .createdDate(dto.getCreatedDate())
                 .popularityDate(dto.getPopularityDate())
                 .liveChatActive(dto.isLiveChatActive())
+                .liveChatUserCount(dto.getLiveChatUserCount())
                 .build();
     }
 }
