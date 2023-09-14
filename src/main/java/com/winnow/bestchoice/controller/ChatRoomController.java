@@ -59,8 +59,8 @@ public class ChatRoomController {
      */
     @GetMapping("/chat/rooms")
     public ResponseEntity<List<ChatRoomResponse>> findAllChatRoom(
-            @RequestParam("page") int page,
-            @RequestParam("size") int size
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
     ) {
         return ResponseEntity.ok().body(chatRoomRepository.findAllChatRoom(page, size));
     }
