@@ -32,8 +32,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
     public static final String REFRESH_TOKEN_COOKIE_NAME = "refresh_token";
     public static final Duration REFRESH_TOKEN_DURATION = Duration.ofDays(14); // 14일
     public static final Duration ACCESS_TOKEN_DURATION = Duration.ofDays(1); // 1일
-    private final static String REDIRECT_PATH = "https://best-choice-steel.vercel.app/login/callback";
-//    private final static String REDIRECT_PATH = "http://localhost:5173/login/callback";
+//    private final static String REDIRECT_PATH = "https://best-choice-steel.vercel.app/login/callback";
+    private final static String REDIRECT_PATH = "http://localhost:5173/login/callback";
 
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;

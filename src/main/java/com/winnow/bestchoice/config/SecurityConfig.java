@@ -158,9 +158,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
        corsConfig.setAllowCredentials(true);
-       corsConfig.addAllowedOrigin("https://best-choice-steel.vercel.app");
-       corsConfig.addAllowedOrigin("ws://best-choice-steel.vercel.app/ws-stomp");
-       corsConfig.addAllowedOrigin("ws://best-choice-steel.vercel.app");
+       corsConfig.addAllowedOrigin("http://localhost:5173");
+       corsConfig.addAllowedOrigin("ws://localhost:5173/ws-stomp");
+       corsConfig.addAllowedOrigin("ws://localhost:5173");
        corsConfig.addAllowedHeader("*");
        corsConfig.addAllowedMethod("*");
 
