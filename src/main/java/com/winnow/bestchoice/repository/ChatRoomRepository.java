@@ -58,6 +58,15 @@ public class ChatRoomRepository {
 
             CheckingUserCount(chatRoom, post, chatRooms);
         }
+        if (!chatRooms.isEmpty()) {
+            return getChatRoomResponses(page, size, chatRooms);
+        }
+
+        return chatRooms;
+
+    }
+
+    private static List<ChatRoomResponse> getChatRoomResponses(int page, int size, List<ChatRoomResponse> chatRooms) {
         chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getChatRoomCreatedDate()));
         ChatRoomPage<ChatRoomResponse> pages = new ChatRoomPage<>(chatRooms, page, size);
         log.info("페이지 정보 : {}", pages);
