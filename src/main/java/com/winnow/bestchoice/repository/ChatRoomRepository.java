@@ -43,9 +43,9 @@ public class ChatRoomRepository {
     }
 
     // 채팅방 목록 조회
-    public ArrayList<ChatRoomResponse> findAllChatRoom(int page, int size) {
+    public List<ChatRoomResponse> findAllChatRoom(int page, int size) {
         log.info("findAllChatRoom() 호출");
-        ArrayList<ChatRoomResponse> chatRooms = new ArrayList<>();
+        List<ChatRoomResponse> chatRooms = new ArrayList<>();
         Set<String> roomIds = hashOpsChatRoom.keys(CHAT_ROOMS);
         log.info("{}", roomIds);
 
@@ -61,7 +61,7 @@ public class ChatRoomRepository {
         chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getChatRoomCreatedDate()));
         ChatRoomPage<ChatRoomResponse> pages = new ChatRoomPage<>(chatRooms, page, size);
 
-        return (ArrayList<ChatRoomResponse>) pages.getPagedData();
+        return pages.getPagedData();
     }
 
     private Post getPostByRoomId(String roomId) {
@@ -71,7 +71,7 @@ public class ChatRoomRepository {
     }
 
 
-    private static void CheckingUserCount(ChatRoom chatRoom, Post post, ArrayList<ChatRoomResponse> chatRooms) {
+    private static void CheckingUserCount(ChatRoom chatRoom, Post post, List<ChatRoomResponse> chatRooms) {
         if (chatRoom.getUserCount() > 0) {
             ChatRoomResponse chatRoomResponse = ChatRoomResponse.fromEntity(post, Objects.requireNonNull(chatRoom));
             chatRooms.add(chatRoomResponse);
