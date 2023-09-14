@@ -60,7 +60,7 @@ public class ChatRoomRepository {
         }
         chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getChatRoomCreatedDate()));
         ChatRoomPage<ChatRoomResponse> pages = new ChatRoomPage<>(chatRooms, page, size);
-
+        log.info("페이지 정보 : {}", pages);
         return pages.getPagedData();
     }
 

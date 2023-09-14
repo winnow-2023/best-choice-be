@@ -1,7 +1,10 @@
 package com.winnow.bestchoice.model.dto;
 
+import lombok.ToString;
+
 import java.util.List;
 
+@ToString
 public class ChatRoomPage<T> {
 
     private List<T> chatrooms;
