@@ -4,17 +4,16 @@ import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
+import com.winnow.bestchoice.model.dto.ChatRoomPage;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.time.Duration;
 import java.util.*;
 
 @RequiredArgsConstructor
@@ -44,7 +43,7 @@ public class ChatRoomRepository {
     }
 
     // 채팅방 목록 조회
-    public List<ChatRoomResponse> findAllChatRoom() {
+    public ArrayList<ChatRoomResponse> findAllChatRoom(int page, int size) {
         log.info("findAllChatRoom() 호출");
         ArrayList<ChatRoomResponse> chatRooms = new ArrayList<>();
         Set<String> roomIds = hashOpsChatRoom.keys(CHAT_ROOMS);
@@ -60,7 +59,9 @@ public class ChatRoomRepository {
             CheckingUserCount(chatRoom, post, chatRooms);
         }
         chatRooms.sort((o1, o2) -> o2.getChatRoomCreatedDate().compareTo(o1.getChatRoomCreatedDate()));
-        return chatRooms;
+        ChatRoomPage<ChatRoomResponse> pages = new ChatRoomPage<>(chatRooms, page, size);
+
+        return (ArrayList<ChatRoomResponse>) pages.getPagedData();
     }
 
     private Post getPostByRoomId(String roomId) {
