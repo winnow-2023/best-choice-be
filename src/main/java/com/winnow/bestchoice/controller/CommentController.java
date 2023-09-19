@@ -2,9 +2,11 @@ package com.winnow.bestchoice.controller;
 
 import com.winnow.bestchoice.annotation.LoginMemberId;
 import com.winnow.bestchoice.model.request.CreateCommentForm;
+import com.winnow.bestchoice.model.response.CommentRes;
 import com.winnow.bestchoice.service.CommentService;
 import com.winnow.bestchoice.type.CommentSort;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -43,10 +45,10 @@ public class CommentController {
     }
 
     @GetMapping("/posts/{postId}/comments")
-    public ResponseEntity<?> getComments(Authentication authentication, @PathVariable long postId,
-                                         @RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size,
-                                         @RequestParam(defaultValue = "LATEST") CommentSort sort) {
+    public ResponseEntity<Page<CommentRes>> getComments(Authentication authentication, @PathVariable long postId,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "10") int size,
+                                                        @RequestParam(defaultValue = "LATEST") CommentSort sort) {
         return ResponseEntity.ok(commentService.getComments(authentication, postId, page, size, sort));
     }
 }

@@ -2,9 +2,12 @@ package com.winnow.bestchoice.controller;
 
 import com.winnow.bestchoice.annotation.LoginMemberId;
 import com.winnow.bestchoice.entity.Post;
+import com.winnow.bestchoice.model.response.NotificationDetailRes;
+import com.winnow.bestchoice.model.response.NotificationRes;
 import com.winnow.bestchoice.service.NotificationService;
 import com.winnow.bestchoice.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,14 +32,15 @@ public class NotificationController {
     }
 
     @GetMapping("api/notifications/all")
-    public ResponseEntity<?> getNotifications(@LoginMemberId long memberId,
-                                              @RequestParam(defaultValue = "0") int page,
-                                              @RequestParam(defaultValue = "10") int size) {
+    public ResponseEntity<Slice<NotificationRes>> getNotifications(@LoginMemberId long memberId,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(notificationService.getNotifications(memberId, page, size));
     }
 
     @GetMapping("api/notifications/{notificationId}")
-    public ResponseEntity<?> getNotificationDetail(@LoginMemberId long memberId, @PathVariable long notificationId) {
+    public ResponseEntity<NotificationDetailRes> getNotificationDetail(@LoginMemberId long memberId,
+                                                                       @PathVariable long notificationId) {
         return ResponseEntity.ok(notificationService.getNotificationDetail(memberId, notificationId));
     }
 

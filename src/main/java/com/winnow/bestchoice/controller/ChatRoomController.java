@@ -1,14 +1,12 @@
 package com.winnow.bestchoice.controller;
 
 import com.winnow.bestchoice.annotation.LoginMemberId;
-import com.winnow.bestchoice.config.jwt.TokenProvider;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
-import com.winnow.bestchoice.repository.PostRepository;
 import com.winnow.bestchoice.service.NotificationService;
 import com.winnow.bestchoice.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +25,6 @@ public class ChatRoomController {
     private final ChatRoomRepository chatRoomRepository;
     private final NotificationService notificationService;
     private final PostService postService;
-    private final PostRepository postRepository;
 
     /**
      *  채팅방 생성
