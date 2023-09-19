@@ -60,7 +60,9 @@ public class PostService {
     private final String VIDEO_PATH = "video/";
     private final int MAX_ATTACHMENT_SIZE = 5;
 
-
+    /**
+     *  게시글 작성
+     */
     public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> imageFiles, List<MultipartFile> videoFiles, long memberId) { // 최적화 - tag 한 번에?
         if (!ObjectUtils.isEmpty(imageFiles) && !ObjectUtils.isEmpty(videoFiles) &&
                 imageFiles.size() + videoFiles.size() > MAX_ATTACHMENT_SIZE) {
@@ -119,6 +121,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  게시글 좋아요
+     */
     public void likePost(long memberId, long postId) { //최적화
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -135,6 +140,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  게시글 좋아요 취소
+     */
     public void unlikePost(long memberId, long postId) { //최적화
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
@@ -149,6 +157,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  게시글 옵션 선택 (A or B)
+     */
     public void choiceOption(long memberId, long postId, Option choice) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -176,6 +187,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  게시글 신고
+     */
     public void reportPost(long memberId, long postId) {
         if (!postRepository.existsByIdAndDeletedFalse(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
@@ -193,6 +207,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  게시글 상세 조회
+     */
     public PostDetailRes getPostDetail(Authentication authentication, long postId) {
         Optional<PostDetailDto> postDetailDtoOptional;
         if (ObjectUtils.isEmpty(authentication)) { //비로그인 사용자
@@ -212,6 +229,9 @@ public class PostService {
         return PostDetailRes.of(postDetailDto, attachmentRepository.findUrlsByPostId(postId));
     }
 
+    /**
+     *  게시글 목록 조회
+     */
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
         if (sort == PostSort.HOT) {
@@ -221,6 +241,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  myPage 게시글 목록 조회
+     */
     public Slice<PostRes> getMyPage(long memberId, int page, int size, MyPageSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<PostSummaryDto> postSlice;
@@ -235,11 +258,17 @@ public class PostService {
         return postSlice.map(PostRes::of);
     }
 
+    /**
+     *  게시글 목록 tag로 조회
+     */
     public Slice<PostRes> getPostsByTag(int page, int size, String tag) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return postQueryRepository.getSliceByTag(pageRequest, tag).map(PostRes::of);
     }
 
+    /**
+     *  게시글 삭제 (논리적 삭제)
+     */
     public void deletePost(long memberId, long postId) {
         if (!postQueryRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
