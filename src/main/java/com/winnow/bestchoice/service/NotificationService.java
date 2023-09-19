@@ -46,6 +46,9 @@ public class NotificationService {
         return emitter;
     }
 
+    /**
+     *  게시글 연관 유저들에게 비동기 알림 + 알림 정보 생성
+     */
     @Async("notificationExecutor")
     public void notifyCreatingRoomByPost(Post post) {
         HashSet<Long> memberIds = getRelatedMemberIds(post);
@@ -102,6 +105,9 @@ public class NotificationService {
         return emitter;
     }
 
+    /**
+     *  알림 목록 조회
+     */
     public Slice<NotificationRes> getNotifications(long memberId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size);
 
@@ -109,6 +115,9 @@ public class NotificationService {
                 .map(NotificationRes::of);
     }
 
+    /**
+     *  알림 삭제
+     */
     public void deleteNotification(long memberId, long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new CustomException(ErrorCode.INVALID_REQUEST));
@@ -119,11 +128,17 @@ public class NotificationService {
         notificationRepository.deleteById(notificationId);
     }
 
+    /**
+     *  알림 전체 삭제
+     */
     @Transactional
     public void deleteAllNotifications(long memberId) {
         notificationRepository.deleteAllByMemberId(memberId);
     }
 
+    /**
+     *  알림 상세 조회
+     */
     @Transactional
     public NotificationDetailRes getNotificationDetail(long memberId, long notificationId) {
         Notification notification = notificationRepository.findWithPostById(notificationId)

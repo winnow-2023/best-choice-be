@@ -33,6 +33,9 @@ public class CommentService {
     private final CommentLikeRepository commentLikeRepository;
     private final TokenProvider tokenProvider;
 
+    /**
+     *  댓글 작성
+     */
     public void createComment(long memberId, long postId, CreateCommentForm commentForm) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -51,6 +54,9 @@ public class CommentService {
         postRepository.plusCommentCountById(postId);
     }
 
+    /**
+     *  댓글 좋아요
+     */
     public void likeComment(long memberId, long commentId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -69,6 +75,9 @@ public class CommentService {
         commentRepository.plusLikeCountById(commentId);
     }
 
+    /**
+     *  댓글 좋아요 취소
+     */
     public void unlikeComment(long memberId, long commentId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -86,6 +95,9 @@ public class CommentService {
         commentRepository.minusLikeCountById(commentId);
     }
 
+    /**
+     *  댓글 삭제
+     */
     public void deleteComment(long memberId, long commentId) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
@@ -101,6 +113,9 @@ public class CommentService {
         postRepository.minusCommentCountById(comment.getPost().getId());
     }
 
+    /**
+     *  댓글 목록 조회
+     */
     public Page<CommentRes> getComments(Authentication authentication, long postId,
                                         int page, int size, CommentSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);

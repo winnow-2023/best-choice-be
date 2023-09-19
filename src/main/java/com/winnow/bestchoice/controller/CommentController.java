@@ -19,6 +19,9 @@ public class CommentController {
 
     private final CommentService commentService;
 
+    /**
+     *  댓글 작성
+     */
     @PostMapping("/api/posts/{postId}/comments")
     public ResponseEntity<?> createComment(@LoginMemberId long memberId, @PathVariable long postId,
                                            @RequestBody @Valid CreateCommentForm commentForm) {
@@ -26,24 +29,36 @@ public class CommentController {
         return ResponseEntity.ok().build();
     }
 
+    /**
+     *  댓글 좋아요
+     */
     @PostMapping("/api/comments/{commentId}/like")
     public ResponseEntity<?> likeComment(@LoginMemberId long memberId, @PathVariable long commentId) {
         commentService.likeComment(memberId, commentId);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     *  댓글 좋아요 취소
+     */
     @PostMapping("/api/comments/{commentId}/unlike")
     public ResponseEntity<?> unlikeComment(@LoginMemberId long memberId, @PathVariable long commentId) {
         commentService.unlikeComment(memberId, commentId);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     *  댓글 삭제
+     */
     @DeleteMapping("/api/comments/{commentId}")
     public ResponseEntity<?> deleteComment(@LoginMemberId long memberId, @PathVariable long commentId) {
         commentService.deleteComment(memberId, commentId);
         return ResponseEntity.ok().build();
     }
 
+    /**
+     *  댓글 목록 조회
+     */
     @GetMapping("/posts/{postId}/comments")
     public ResponseEntity<Page<CommentRes>> getComments(Authentication authentication, @PathVariable long postId,
                                                         @RequestParam(defaultValue = "0") int page,
