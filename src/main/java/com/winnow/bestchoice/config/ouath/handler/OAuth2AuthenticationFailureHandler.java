@@ -17,8 +17,8 @@ import java.io.IOException;
 public class OAuth2AuthenticationFailureHandler extends SimpleUrlAuthenticationFailureHandler {
 
     private final OAuth2AuthorizationRequestBasedOnCookieRepository authorizationRequestRepository;
-    private final static String REDIRECT_PATH = "http://localhost:5173/login/callback";
-//    private final static String REDIRECT_PATH = "https://best-choice-steel.vercel.app/login/callback";
+//    private final static String REDIRECT_PATH = "http://localhost:5173/login/callback";
+    private final static String REDIRECT_PATH = "https://best-choice-steel.vercel.app/login/callback";
 
     @Override
     public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
