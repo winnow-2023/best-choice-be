@@ -47,6 +47,7 @@ public class PostService {
     private final ChoiceRepository choiceRepository;
     private final AttachmentRepository attachmentRepository;
     private final ReportRepository reportRepository;
+    private final ChatRoomRepository chatRoomRepository;
     private final AmazonS3Client amazonS3Client;
     private final TokenProvider tokenProvider;
     @Value("${cloud.aws.s3.bucket}")
@@ -59,13 +60,14 @@ public class PostService {
     private final String VIDEO_PATH = "video/";
     private final int MAX_ATTACHMENT_SIZE = 5;
 
-
-    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> imageFiles, List<MultipartFile> videoFiles, Authentication authentication) { // 최적화 - tag 한 번에?
+    /**
+     *  게시글 작성
+     */
+    public PostDetailRes createPost(CreatePostForm createPostForm, List<MultipartFile> imageFiles, List<MultipartFile> videoFiles, long memberId) { // 최적화 - tag 한 번에?
         if (!ObjectUtils.isEmpty(imageFiles) && !ObjectUtils.isEmpty(videoFiles) &&
                 imageFiles.size() + videoFiles.size() > MAX_ATTACHMENT_SIZE) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-        long memberId = tokenProvider.getMemberId(authentication);
         Member member = memberRepository.findById(memberId).
                 orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));// 쿼리 최적화
         Post post = postRepository.save(createPostForm.toEntity(member));
@@ -119,8 +121,10 @@ public class PostService {
         }
     }
 
-    public void likePost(Authentication authentication, long postId) { //최적화
-        long memberId = tokenProvider.getMemberId(authentication);
+    /**
+     *  게시글 좋아요
+     */
+    public void likePost(long memberId, long postId) { //최적화
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
@@ -136,8 +140,10 @@ public class PostService {
         }
     }
 
-    public void unlikePost(Authentication authentication, long postId) { //최적화
-        long memberId = tokenProvider.getMemberId(authentication);
+    /**
+     *  게시글 좋아요 취소
+     */
+    public void unlikePost(long memberId, long postId) { //최적화
         Post post = postRepository.findByIdAndDeletedFalse(postId)
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
         PostLike postLike = postLikeRepository.findByPost_IdAndMember_Id(postId, memberId)
@@ -151,9 +157,10 @@ public class PostService {
         }
     }
 
-    public void choiceOption(Authentication authentication, long postId, Option choice) {
-        long memberId = tokenProvider.getMemberId(authentication);
-
+    /**
+     *  게시글 옵션 선택 (A or B)
+     */
+    public void choiceOption(long memberId, long postId, Option choice) {
         if (!memberRepository.existsById(memberId)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
@@ -180,8 +187,10 @@ public class PostService {
         }
     }
 
-    public void reportPost(Authentication authentication, long postId) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    /**
+     *  게시글 신고
+     */
+    public void reportPost(long memberId, long postId) {
         if (!postRepository.existsByIdAndDeletedFalse(postId)) {
             throw new CustomException(ErrorCode.POST_NOT_FOUND);
         }
@@ -198,6 +207,9 @@ public class PostService {
         }
     }
 
+    /**
+     *  게시글 상세 조회
+     */
     public PostDetailRes getPostDetail(Authentication authentication, long postId) {
         Optional<PostDetailDto> postDetailDtoOptional;
         if (ObjectUtils.isEmpty(authentication)) { //비로그인 사용자
@@ -210,9 +222,16 @@ public class PostService {
         PostDetailDto postDetailDto = postDetailDtoOptional
                 .orElseThrow(() -> new CustomException(ErrorCode.POST_NOT_FOUND));
 
+        if (postDetailDto.isLiveChatActive()) {
+            postDetailDto.setLiveChatUserCount(chatRoomRepository.getUserCount(String.valueOf(postId)));
+        }
+
         return PostDetailRes.of(postDetailDto, attachmentRepository.findUrlsByPostId(postId));
     }
 
+    /**
+     *  게시글 목록 조회
+     */
     public Slice<PostRes> getPosts(int page, int size, PostSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
         if (sort == PostSort.HOT) {
@@ -222,8 +241,10 @@ public class PostService {
         }
     }
 
-    public Slice<PostRes> getMyPage(Authentication authentication, int page, int size, MyPageSort sort) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    /**
+     *  myPage 게시글 목록 조회
+     */
+    public Slice<PostRes> getMyPage(long memberId, int page, int size, MyPageSort sort) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Slice<PostSummaryDto> postSlice;
 
@@ -237,13 +258,18 @@ public class PostService {
         return postSlice.map(PostRes::of);
     }
 
+    /**
+     *  게시글 목록 tag로 조회
+     */
     public Slice<PostRes> getPostsByTag(int page, int size, String tag) {
         PageRequest pageRequest = PageRequest.of(page, size);
         return postQueryRepository.getSliceByTag(pageRequest, tag).map(PostRes::of);
     }
 
-    public void deletePost(Authentication authentication, long postId) {
-        long memberId = tokenProvider.getMemberId(authentication);
+    /**
+     *  게시글 삭제 (논리적 삭제)
+     */
+    public void deletePost(long memberId, long postId) {
         if (!postQueryRepository.existsByPostIdAndMemberId(postId, memberId)) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }

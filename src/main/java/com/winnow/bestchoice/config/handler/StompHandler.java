@@ -1,10 +1,12 @@
 package com.winnow.bestchoice.config.handler;
 
 import com.winnow.bestchoice.config.jwt.TokenProvider;
+import com.winnow.bestchoice.entity.Member;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatMessage;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
+import com.winnow.bestchoice.repository.MemberRepository;
 import com.winnow.bestchoice.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,9 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -31,6 +36,7 @@ public class StompHandler implements ChannelInterceptor {
     private final TokenProvider tokenProvider;
     private final ChatRoomRepository chatRoomRepository;
     private final ChatService chatService;
+    private final MemberRepository memberRepository;
 
     // WebSocket을 통해 들어온 요청이 처리 되기 전 실행된다.
     @Override
@@ -51,49 +57,66 @@ public class StompHandler implements ChannelInterceptor {
     }
 
     private void checkToken(StompHeaderAccessor accessor) {
+        String sessionId = accessor.getSessionId();
         String jwtToken = getTokenByHeader(accessor);
-        log.info("[CONNECT] token : {}", jwtToken);
+        Map<String, Object> sessionAttributes = accessor.getSessionAttributes();
+
+        Long memberId = tokenProvider.getMemberId(jwtToken);
+        String nickname = memberRepository.findById(memberId).get().getNickname();
+        Objects.requireNonNull(sessionAttributes).put("nickname", nickname);
+
+        log.info("[CONNECT] 토큰 : {}, 세션 아이디 : {}", jwtToken, sessionId);
         tokenProvider.validToken(jwtToken);
     }
 
     private void enterProcess(Message<?> message, StompHeaderAccessor accessor) {
         String roomId = chatService.getRoomId(Objects.requireNonNull(accessor.getDestination()));
-//        String sessionId = (String) message.getHeaders().get("SessionId");
+        String sessionId = accessor.getSessionId();
 
         if (!checkCapacity(roomId)) {
             throw new CustomException(ErrorCode.CHATROOM_CAPACITY_EXCEEDED);
         }
 
+        chatRoomRepository.setUserEnterInfo(sessionId, roomId);
         chatRoomRepository.plusUserCount(roomId);
+        long userCount = chatRoomRepository.getUserCount(roomId);
 
-        String nickname = getNicknameByToken(accessor);
+        String jwtToken = getTokenByHeader(accessor);
+        Long memberId = tokenProvider.getMemberId(jwtToken);
+        Member member = memberRepository.findById(memberId).get();
+
+        String nickname = member.getNickname();
         sendChatMessage(ENTER, roomId, nickname);
 
-        log.info("[SUBSCRIBED] 닉네임 : {}, 채팅방 : {}", nickname, roomId);
+        log.info("[SUBSCRIBED] 세션 아이디 : {}, 닉네임 : {}, 채팅방 : {}, 유저수 : {}", sessionId, nickname, roomId, userCount);
     }
 
     private boolean checkCapacity(String roomId) {
         log.info("checkCapacity() 호출");
         long userCount = chatRoomRepository.getUserCount(roomId);
-        log.info("현재 채팅방 유저수 : {}", userCount);
+        log.info("입장 전 채팅방 유저수 : {}", userCount);
 
         return userCount < 10;
     }
 
     private void disconnectProcess(Message<?> message, StompHeaderAccessor accessor) {
-//        String sessionId = (String) message.getHeaders().get("simpSessionId");
-        String roomId = chatService.getRoomId(Optional.ofNullable((String) message.getHeaders()
-                .get("destination")).orElse("InvalidRoomId"));
+        log.info("disconnectProcess() 호출!!!");
+        String sessionId = accessor.getSessionId();
+        String roomId = chatRoomRepository.getUserEnterRoomId(sessionId);
+        log.info("세션 아이디 : {}, 채팅방 : {}", sessionId, roomId);
 
+        log.info("minusUserCount()가 호출되었음!!!");
         chatRoomRepository.minusUserCount(roomId);
 
-        String nickname = getNicknameByToken(accessor);
+        log.info("헤더에서 토큰 가져오는 부분 실행!!!");
+        String nickname = (String) accessor.getSessionAttributes().get("nickname");
+        log.info("닉네임 : {}", nickname);
+
         sendChatMessage(QUIT, roomId, nickname);
-//        chatRoomRepository.removeUserEnterInfo(sessionId);
+        chatRoomRepository.removeUserEnterInfo(sessionId);
 
-        log.info("[DISCONNECTED] roomId : {}", roomId);
+        log.info("[DISCONNECTED] 세션 아이디: {}, 채팅방 : {}", sessionId, roomId);
     }
-
 
     private void sendChatMessage(ChatMessage.MessageType type, String roomId, String nickname) {
         chatService.sendChatMessage(ChatMessage.builder()
@@ -101,11 +124,6 @@ public class StompHandler implements ChannelInterceptor {
                 .roomId(roomId)
                 .sender(nickname)
                 .build());
-    }
-
-    private String getNicknameByToken(StompHeaderAccessor accessor) {
-        String token = getTokenByHeader(accessor);
-        return tokenProvider.getNickname(token);
     }
 
     private static String getTokenByHeader(StompHeaderAccessor accessor) {

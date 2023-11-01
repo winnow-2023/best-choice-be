@@ -1,19 +1,17 @@
 package com.winnow.bestchoice.controller;
 
-import com.winnow.bestchoice.config.jwt.TokenProvider;
+import com.winnow.bestchoice.annotation.LoginMemberId;
 import com.winnow.bestchoice.entity.Post;
 import com.winnow.bestchoice.exception.CustomException;
 import com.winnow.bestchoice.exception.ErrorCode;
 import com.winnow.bestchoice.model.dto.ChatRoom;
 import com.winnow.bestchoice.model.response.ChatRoomResponse;
 import com.winnow.bestchoice.repository.ChatRoomRepository;
-import com.winnow.bestchoice.repository.PostRepository;
+import com.winnow.bestchoice.service.NotificationService;
 import com.winnow.bestchoice.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,21 +22,22 @@ import java.util.Objects;
 @Slf4j
 public class ChatRoomController {
 
-    private final TokenProvider tokenProvider;
     private final ChatRoomRepository chatRoomRepository;
+    private final NotificationService notificationService;
     private final PostService postService;
 
     /**
      *  채팅방 생성
      */
     @PostMapping("/chat/open/{postId}")
-    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable Long postId, Authentication authentication) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public ResponseEntity<ChatRoom> createChatRoom(@PathVariable long postId, @LoginMemberId long memberId) {
         Post post = postService.findByPostId(postId);
         Long PostMemberId = post.getMember().getId();
 
         validateRequest(memberId, PostMemberId, post);
-        ChatRoom chatRoom = chatRoomRepository.createChatRoom(String.valueOf(postId));
+        ChatRoom chatRoom = chatRoomRepository.createChatRoom(postId);
+
+        notificationService.notifyCreatingRoomByPost(post); //채팅방 생성시 해당 게시글 관련 유저들에게 비동기 알림
 
         return ResponseEntity.ok().body(chatRoom);
     }
@@ -57,18 +56,17 @@ public class ChatRoomController {
      */
     @GetMapping("/chat/rooms")
     public ResponseEntity<List<ChatRoomResponse>> findAllChatRoom(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(name = "size", defaultValue = "10") int size)
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size)
     {
-        return ResponseEntity.ok().body((List<ChatRoomResponse>) chatRoomRepository.findAllChatRoom(page, size));
+        return ResponseEntity.ok().body(chatRoomRepository.findAllChatRoom(page, size));
     }
 
     /**
      * 채팅방 삭제
      */
     @DeleteMapping("/chat/rooms/{roomId}")
-    public ResponseEntity<?> deleteChatRoom(@PathVariable String roomId, Authentication authentication) {
-        Long memberId = tokenProvider.getMemberId(authentication);
+    public ResponseEntity<?> deleteChatRoom(@PathVariable String roomId, @LoginMemberId long memberId) {
         Long writerId = postService.findByPostId(Long.parseLong(roomId)).getMember().getId();
 
         if (!Objects.equals(memberId, writerId)) {
