@@ -160,7 +160,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
        corsConfig.setAllowCredentials(true);
        corsConfig.addAllowedOrigin("https://best-choice-steel.vercel.app");
        corsConfig.addAllowedOrigin("ws://best-choice-steel.vercel.app/ws-stomp");
+       corsConfig.addAllowedOrigin("wss://best-choice-steel.vercel.app/ws-stomp");
        corsConfig.addAllowedOrigin("ws://best-choice-steel.vercel.app");
+       corsConfig.addAllowedOrigin("wss://best-choice-steel.vercel.app");
        corsConfig.addAllowedHeader("*");
        corsConfig.addAllowedMethod("*");
 
